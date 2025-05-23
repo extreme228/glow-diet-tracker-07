@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
@@ -339,7 +338,7 @@ export default function Weight() {
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-muted-foreground">Registros</p>
                 <div className={cn("p-2 rounded-lg", theme === 'light' ? "bg-purple-100" : "bg-purple-500/20")}>
-                  <ChartLineUp className="w-4 h-4 text-purple-500" />
+                  <ChartLine className="w-4 h-4 text-purple-500" />
                 </div>
               </div>
               <p className="text-2xl font-bold mt-2">{stats.recordsCount}</p>
