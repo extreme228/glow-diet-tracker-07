@@ -1,14 +1,18 @@
 
 import React, { useState } from 'react';
 import { useNutrition } from '@/context/NutritionContext';
+import { useTheme } from '@/context/ThemeContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/components/ui/use-toast';
+import { Card } from '@/components/ui/card';
+import { Moon, Sun, Sparkles } from 'lucide-react';
 
 const Settings = () => {
   const { dailyGoal, updateDailyGoal } = useNutrition();
+  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   
   const [calories, setCalories] = useState(dailyGoal.calories.toString());
@@ -37,6 +41,36 @@ const Settings = () => {
       <h1 className="text-2xl font-bold mb-6">Configurações</h1>
       
       <div className="glow-card p-5 mb-5">
+        <h2 className="text-lg font-semibold mb-4">Tema</h2>
+        <div className="grid grid-cols-3 gap-4">
+          <Button
+            variant={theme === 'light' ? 'default' : 'outline'}
+            onClick={() => setTheme('light')}
+            className="flex flex-col items-center gap-2 py-6 h-auto"
+          >
+            <Sun size={24} />
+            <span>Claro</span>
+          </Button>
+          <Button
+            variant={theme === 'dark' ? 'default' : 'outline'}
+            onClick={() => setTheme('dark')}
+            className="flex flex-col items-center gap-2 py-6 h-auto"
+          >
+            <Moon size={24} />
+            <span>Escuro</span>
+          </Button>
+          <Button
+            variant={theme === 'vibrant' ? 'default' : 'outline'}
+            onClick={() => setTheme('vibrant')}
+            className="flex flex-col items-center gap-2 py-6 h-auto"
+          >
+            <Sparkles size={24} />
+            <span>Vibrante</span>
+          </Button>
+        </div>
+      </div>
+      
+      <div className="glow-card p-5 mb-5">
         <h2 className="text-lg font-semibold mb-4">Metas Nutricionais</h2>
         
         <form onSubmit={handleUpdateGoals} className="space-y-4">
@@ -50,17 +84,17 @@ const Settings = () => {
               onChange={(e) => setCalories(e.target.value)}
               min="0"
               step="50"
-              className="bg-nutritrack-card border-white/10 text-white focus:border-nutritrack-green"
+              className="bg-card border-border text-foreground focus:border-primary"
             />
           </div>
           
-          <Separator className="bg-white/10 my-4" />
+          <Separator className="bg-border my-4" />
           
           <h3 className="text-sm font-medium mb-3">Macronutrientes (g)</h3>
           
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="protein" className="text-nutritrack-green">Proteínas</Label>
+              <Label htmlFor="protein" className="text-primary">Proteínas</Label>
               <Input
                 id="protein"
                 type="number"
@@ -69,12 +103,12 @@ const Settings = () => {
                 onChange={(e) => setProtein(e.target.value)}
                 min="0"
                 step="1"
-                className="bg-nutritrack-card border-white/10 text-white focus:border-nutritrack-green"
+                className="bg-card border-border text-foreground focus:border-primary"
               />
             </div>
             
             <div>
-              <Label htmlFor="carbs" className="text-nutritrack-blue">Carboidratos</Label>
+              <Label htmlFor="carbs" className="text-blue-500">Carboidratos</Label>
               <Input
                 id="carbs"
                 type="number"
@@ -83,12 +117,12 @@ const Settings = () => {
                 onChange={(e) => setCarbs(e.target.value)}
                 min="0"
                 step="1"
-                className="bg-nutritrack-card border-white/10 text-white focus:border-nutritrack-blue"
+                className="bg-card border-border text-foreground focus:border-blue-500"
               />
             </div>
             
             <div>
-              <Label htmlFor="fat" className="text-nutritrack-purple">Gorduras</Label>
+              <Label htmlFor="fat" className="text-accent">Gorduras</Label>
               <Input
                 id="fat"
                 type="number"
@@ -97,7 +131,7 @@ const Settings = () => {
                 onChange={(e) => setFat(e.target.value)}
                 min="0"
                 step="1"
-                className="bg-nutritrack-card border-white/10 text-white focus:border-nutritrack-purple"
+                className="bg-card border-border text-foreground focus:border-accent"
               />
             </div>
           </div>
@@ -112,10 +146,10 @@ const Settings = () => {
       
       <div className="glow-card p-5">
         <h2 className="text-lg font-semibold mb-2">Sobre o NutriTrack</h2>
-        <p className="text-gray-400 text-sm mb-4">
+        <p className="text-muted-foreground text-sm mb-4">
           Versão 1.0.0
         </p>
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-muted-foreground">
           Aplicativo de controle de alimentação e acompanhamento nutricional.
           Todos os dados são armazenados localmente no seu dispositivo.
         </p>

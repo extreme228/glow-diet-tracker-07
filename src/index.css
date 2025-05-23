@@ -7,6 +7,38 @@
 
 @layer base {
   :root {
+    --background: 210 40% 96.1%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 160 70% 50%;
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 210 40% 90%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 90%;
+    --muted-foreground: 215 16% 46%;
+
+    --accent: 160 70% 50%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 160 70% 50%;
+
+    --radius: 1rem;
+  }
+
+  .dark {
     --background: 222 47% 11%;
     --foreground: 210 40% 98%;
 
@@ -34,8 +66,36 @@
     --border: 222 47% 25%;
     --input: 222 47% 25%;
     --ring: 160 70% 50%;
+  }
 
-    --radius: 1rem;
+  .vibrant {
+    --background: 217 50% 9%;
+    --foreground: 210 40% 98%;
+
+    --card: 217 42% 15%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 217 50% 9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 160 100% 50%;
+    --primary-foreground: 217 50% 9%;
+
+    --secondary: 217 42% 20%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 42% 20%;
+    --muted-foreground: 215 20.2% 75%;
+
+    --accent: 283 100% 65%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 100% 65%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 42% 25%;
+    --input: 217 42% 25%;
+    --ring: 160 100% 50%;
   }
 }
 
@@ -45,7 +105,7 @@
   }
   
   body {
-    @apply bg-nutritrack-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans;
     font-family: 'Poppins', sans-serif;
   }
 
@@ -56,7 +116,7 @@
 
 @layer components {
   .glow-card {
-    @apply rounded-xl bg-nutritrack-card bg-opacity-70 backdrop-blur-sm border border-white/10 shadow-lg relative overflow-hidden;
+    @apply rounded-xl bg-card bg-opacity-70 backdrop-blur-sm border border-white/10 shadow-lg relative overflow-hidden;
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
   }
   
@@ -69,10 +129,32 @@
   }
 
   .glow-button-primary {
-    @apply glow-button from-nutritrack-green to-nutritrack-blue text-white hover:shadow-glow-green;
+    @apply glow-button from-primary to-blue-500 text-primary-foreground hover:shadow-glow-green;
   }
 
   .glow-button-secondary {
-    @apply glow-button from-nutritrack-purple to-nutritrack-blue text-white hover:shadow-glow-purple;
+    @apply glow-button from-accent to-blue-500 text-white hover:shadow-glow-purple;
+  }
+
+  .vibrant {
+    .glow-card {
+      @apply border-nutritrack-vibrant-green/20;
+      box-shadow: 0 8px 32px 0 rgba(0, 255, 157, 0.15);
+    }
+
+    .glow-button-primary {
+      @apply from-nutritrack-vibrant-green to-nutritrack-vibrant-blue hover:shadow-glow-vibrant;
+    }
+
+    .glow-button-secondary {
+      @apply from-nutritrack-vibrant-purple to-nutritrack-vibrant-blue hover:shadow-glow-vibrant-purple;
+    }
+  }
+
+  .light {
+    .glow-card {
+      @apply bg-white bg-opacity-100 border-nutritrack-light-border;
+      box-shadow: 0 8px 30px 0 rgba(0, 0, 0, 0.05);
+    }
   }
 }

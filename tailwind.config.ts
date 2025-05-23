@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -71,6 +70,14 @@ export default {
 					yellow: '#FFD93D',
 					background: '#0F172A',
 					card: '#1E293B',
+					vibrant: '#0a1325',
+					'vibrant-card': '#172136',
+					'vibrant-green': '#00ff9d',
+					'vibrant-blue': '#00c3ff',
+					'vibrant-purple': '#a64dff',
+					light: '#f8fafc',
+					'light-card': '#ffffff',
+					'light-border': '#e2e8f0',
 				}
 			},
 			borderRadius: {
@@ -121,6 +128,9 @@ export default {
 				'glow-blue': '0 0 15px 2px rgba(34, 162, 224, 0.4)',
 				'glow-purple': '0 0 15px 2px rgba(128, 98, 214, 0.4)',
 				'glow-coral': '0 0 15px 2px rgba(255, 107, 107, 0.4)',
+				'glow-vibrant': '0 0 20px 2px rgba(0, 255, 157, 0.6)',
+				'glow-vibrant-blue': '0 0 20px 2px rgba(0, 195, 255, 0.6)',
+				'glow-vibrant-purple': '0 0 20px 2px rgba(166, 77, 255, 0.6)',
 			},
 		}
 	},
