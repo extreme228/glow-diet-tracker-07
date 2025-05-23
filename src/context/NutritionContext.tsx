@@ -13,9 +13,13 @@ export const NutritionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [foods, setFoods] = useLocalStorage<Food[]>('nutritrack_foods', []);
   const [meals, setMeals] = useLocalStorage<Meal[]>('nutritrack_meals', []);
   const [dailyGoal, setDailyGoal] = useLocalStorage<DailyGoal>('nutritrack_goal', defaultDailyGoal);
-  const [nutritionPlans, setNutritionPlans] = useLocalStorage<NutritionPlan[]>('nutritrack_plans', []);
+  const [nutritionPlans, setNutritionPlans] = useLocalStorage<NutritionPlan[]>('nutritrack_nutrition_plans', []);
   const [activePlanId, setActivePlanId] = useLocalStorage<string | null>('nutritrack_active_plan', null);
   const { toast } = useToast();
+
+  // Debug log para acompanhar as mudanças nos planos
+  console.log('NutritionContext - Current plans:', nutritionPlans);
+  console.log('NutritionContext - Active plan ID:', activePlanId);
 
   const addFood = (food: Omit<Food, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString();
@@ -113,6 +117,7 @@ export const NutritionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       id: crypto.randomUUID(),
       ...plan,
     };
+    console.log('Adding new plan:', newPlan);
     setNutritionPlans([...nutritionPlans, newPlan]);
     toast({
       title: 'Plano adicionado',
@@ -121,6 +126,7 @@ export const NutritionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const updateNutritionPlan = (updatedPlan: NutritionPlan) => {
+    console.log('Updating plan:', updatedPlan);
     setNutritionPlans(
       nutritionPlans.map((plan) => (plan.id === updatedPlan.id ? updatedPlan : plan))
     );
@@ -132,6 +138,7 @@ export const NutritionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const deleteNutritionPlan = (id: string) => {
     const plan = nutritionPlans.find(p => p.id === id);
+    console.log('Deleting plan:', plan);
     setNutritionPlans(nutritionPlans.filter((plan) => plan.id !== id));
     
     // Se o plano excluído for o ativo, desativa-o
@@ -147,6 +154,7 @@ export const NutritionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const setActivePlan = (planId: string | null) => {
+    console.log('Setting active plan:', planId);
     setActivePlanId(planId);
     if (planId) {
       const plan = nutritionPlans.find(p => p.id === planId);
