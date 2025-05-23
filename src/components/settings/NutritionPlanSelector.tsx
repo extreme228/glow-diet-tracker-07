@@ -15,18 +15,20 @@ const NutritionPlanSelector = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   useEffect(() => {
-    // Debug logs mais detalhados
     console.log('NutritionPlanSelector - Nutrition Plans:', nutritionPlans);
     console.log('NutritionPlanSelector - Plans length:', nutritionPlans?.length);
     console.log('NutritionPlanSelector - Active Plan ID:', activePlanId);
     
-    // Verificar o que está no localStorage
-    const storedPlans = localStorage.getItem('nutritrack_nutrition_plans');
-    console.log('NutritionPlanSelector - localStorage plans:', storedPlans);
+    // Verificar todas as chaves do localStorage que contêm "plan"
+    const allKeys = Object.keys(localStorage).filter(key => 
+      key.toLowerCase().includes('plan') || 
+      key.toLowerCase().includes('nutri')
+    );
+    console.log('NutritionPlanSelector - All plan-related localStorage keys:', allKeys);
     
-    // Verificar todas as chaves relacionadas no localStorage
-    const allKeys = Object.keys(localStorage).filter(key => key.includes('nutri'));
-    console.log('NutritionPlanSelector - All nutrition-related localStorage keys:', allKeys);
+    // Verificar especificamente a chave que aparece nos logs
+    const customPlans = localStorage.getItem('nutritionCustomPlans');
+    console.log('NutritionPlanSelector - nutritionCustomPlans content:', customPlans);
   }, [nutritionPlans, activePlanId]);
   
   // Função para traduzir a categoria do plano para português
@@ -52,22 +54,56 @@ const NutritionPlanSelector = () => {
   // Verifique se há algum plano disponível
   const hasPlans = nutritionPlans && nutritionPlans.length > 0;
   
-  // Função para sincronizar planos - força uma re-leitura do localStorage
+  // Função para sincronizar planos - agora procura especificamente por nutritionCustomPlans
   const syncPlans = () => {
     setIsLoading(true);
     console.log('Sincronizando planos...');
     
     setTimeout(() => {
-      // Forçar uma atualização verificando diferentes possíveis chaves do localStorage
-      const possibleKeys = [
-        'nutritrack_nutrition_plans',
-        'nutritrack_plans', 
-        'nutrition_plans',
-        'nutritrack-plans'
-      ];
+      // Verificar a chave específica que aparece nos logs
+      const customPlansData = localStorage.getItem('nutritionCustomPlans');
+      console.log('Raw nutritionCustomPlans data:', customPlansData);
       
       let foundPlans = [];
-      let usedKey = '';
+      
+      if (customPlansData && customPlansData !== '[]' && customPlansData !== 'null') {
+        try {
+          const parsed = JSON.parse(customPlansData);
+          console.log('Parsed nutritionCustomPlans:', parsed);
+          
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            foundPlans = parsed;
+            console.log('Found plans in nutritionCustomPlans:', foundPlans);
+            
+            // Migrar para a chave correta do contexto
+            localStorage.setItem('nutritrack_nutrition_plans', JSON.stringify(foundPlans));
+            console.log('Plans migrated to nutritrack_nutrition_plans');
+            
+            toast({
+              title: `${foundPlans.length} planos encontrados e sincronizados`,
+              description: "Recarregando a página para aplicar as mudanças...",
+            });
+            
+            // Recarregar a página para forçar o contexto a ler os novos dados
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+            
+            setIsLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.log('Erro ao parsear nutritionCustomPlans:', e);
+        }
+      }
+      
+      // Se não encontrou planos na chave principal, verificar outras chaves
+      const possibleKeys = [
+        'nutritrack_nutrition_plans',
+        'nutrition_plans',
+        'plans',
+        'customPlans'
+      ];
       
       for (const key of possibleKeys) {
         const stored = localStorage.getItem(key);
@@ -76,8 +112,7 @@ const NutritionPlanSelector = () => {
             const parsed = JSON.parse(stored);
             if (Array.isArray(parsed) && parsed.length > 0) {
               foundPlans = parsed;
-              usedKey = key;
-              console.log(`Planos encontrados na chave: ${key}`, parsed);
+              console.log(`Found plans in ${key}:`, parsed);
               break;
             }
           } catch (e) {
@@ -86,24 +121,14 @@ const NutritionPlanSelector = () => {
         }
       }
       
-      // Se encontrou planos em uma chave diferente, sincronizar
-      if (foundPlans.length > 0 && usedKey !== 'nutritrack_nutrition_plans') {
-        localStorage.setItem('nutritrack_nutrition_plans', JSON.stringify(foundPlans));
-        console.log('Planos sincronizados para a chave correta');
-        // Forçar reload da página para atualizar o contexto
-        window.location.reload();
-        return;
-      }
-      
-      console.log('Planos finais encontrados:', foundPlans);
-      console.log('Planos do contexto atual:', nutritionPlans);
+      console.log('Total plans found:', foundPlans.length);
       
       toast({
-        title: hasPlans || foundPlans.length > 0
-          ? `Planos sincronizados (${Math.max(nutritionPlans?.length || 0, foundPlans.length)} encontrados)` 
+        title: foundPlans.length > 0
+          ? `${foundPlans.length} planos encontrados`
           : "Nenhum plano encontrado",
-        description: hasPlans || foundPlans.length > 0
-          ? "Todos os planos nutricionais foram sincronizados." 
+        description: foundPlans.length > 0
+          ? "Planos sincronizados com sucesso."
           : "Visite a aba Avançados para criar novos planos.",
       });
       
