@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				nutritrack: {
+					green: '#2CDA9D',
+					blue: '#22A2E0',
+					purple: '#8062D6',
+					coral: '#FF6B6B',
+					yellow: '#FFD93D',
+					background: '#0F172A',
+					card: '#1E293B',
 				}
 			},
 			borderRadius: {
@@ -84,12 +94,34 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-glow': {
+					'0%, 100%': { 
+						boxShadow: '0 0 15px 2px rgba(44, 218, 157, 0.3)',
+						transform: 'scale(1)'  
+					},
+					'50%': { 
+						boxShadow: '0 0 20px 5px rgba(44, 218, 157, 0.5)',
+						transform: 'scale(1.01)' 
+					}
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-5px)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+				'float': 'float 3s ease-in-out infinite'
+			},
+			boxShadow: {
+				'glow-green': '0 0 15px 2px rgba(44, 218, 157, 0.4)',
+				'glow-blue': '0 0 15px 2px rgba(34, 162, 224, 0.4)',
+				'glow-purple': '0 0 15px 2px rgba(128, 98, 214, 0.4)',
+				'glow-coral': '0 0 15px 2px rgba(255, 107, 107, 0.4)',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
