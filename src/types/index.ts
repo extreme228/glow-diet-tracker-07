@@ -1,4 +1,3 @@
-
 export interface Food {
   id: string;
   name: string;
@@ -25,16 +24,26 @@ export interface Meal {
   time: string;
 }
 
-export interface DailyGoal {
+export type DailyGoal = {
   calories: number;
   protein: number;
   carbs: number;
   fat: number;
-}
+};
 
-export interface NutritionSummary {
+export type NutritionSummary = {
   calories: number;
   protein: number;
   carbs: number;
   fat: number;
-}
+};
+
+export type NutritionPlan = {
+  id: string;
+  name: string;
+  type: 'daily' | 'weekly'; // diário (mesmo valor todos os dias) ou semanal (valores diferentes por dia da semana)
+  goals?: DailyGoal; // para planos do tipo 'daily'
+  weeklyGoals?: { [key: number]: DailyGoal }; // para planos do tipo 'weekly', onde a chave é o dia da semana (0-6)
+  description?: string;
+  category?: 'bulking' | 'cutting' | 'maintenance' | 'carb-cycling' | 'custom';
+};

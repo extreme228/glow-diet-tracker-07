@@ -1,12 +1,15 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Food, Meal, DailyGoal, NutritionSummary } from '@/types';
+import { Food, Meal, DailyGoal, NutritionSummary, NutritionPlan } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
+import { getToday } from '@/lib/utils';
 
 interface NutritionContextType {
   foods: Food[];
   meals: Meal[];
   dailyGoal: DailyGoal;
+  nutritionPlans: NutritionPlan[];
+  activePlanId: string | null;
   addFood: (food: Omit<Food, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateFood: (food: Food) => void;
   deleteFood: (id: string) => void;
@@ -17,6 +20,11 @@ interface NutritionContextType {
   updateDailyGoal: (goal: DailyGoal) => void;
   getFood: (id: string) => Food | undefined;
   getMealsForDate: (date: string) => Meal[];
+  addNutritionPlan: (plan: Omit<NutritionPlan, 'id'>) => void;
+  updateNutritionPlan: (plan: NutritionPlan) => void;
+  deleteNutritionPlan: (id: string) => void;
+  setActivePlan: (planId: string | null) => void;
+  getActivePlanGoals: (date: string) => DailyGoal | null;
 }
 
 const defaultDailyGoal: DailyGoal = {
@@ -32,6 +40,8 @@ export const NutritionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [foods, setFoods] = useState<Food[]>([]);
   const [meals, setMeals] = useState<Meal[]>([]);
   const [dailyGoal, setDailyGoal] = useState<DailyGoal>(defaultDailyGoal);
+  const [nutritionPlans, setNutritionPlans] = useState<NutritionPlan[]>([]);
+  const [activePlanId, setActivePlanId] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Load data from localStorage on component mount
@@ -39,10 +49,14 @@ export const NutritionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const storedFoods = localStorage.getItem('nutritrack_foods');
     const storedMeals = localStorage.getItem('nutritrack_meals');
     const storedGoal = localStorage.getItem('nutritrack_goal');
+    const storedPlans = localStorage.getItem('nutritrack_plans');
+    const storedActivePlan = localStorage.getItem('nutritrack_active_plan');
 
     if (storedFoods) setFoods(JSON.parse(storedFoods));
     if (storedMeals) setMeals(JSON.parse(storedMeals));
     if (storedGoal) setDailyGoal(JSON.parse(storedGoal));
+    if (storedPlans) setNutritionPlans(JSON.parse(storedPlans));
+    if (storedActivePlan) setActivePlanId(JSON.parse(storedActivePlan));
   }, []);
 
   // Save data to localStorage whenever it changes
@@ -57,6 +71,14 @@ export const NutritionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   useEffect(() => {
     localStorage.setItem('nutritrack_goal', JSON.stringify(dailyGoal));
   }, [dailyGoal]);
+
+  useEffect(() => {
+    localStorage.setItem('nutritrack_plans', JSON.stringify(nutritionPlans));
+  }, [nutritionPlans]);
+
+  useEffect(() => {
+    localStorage.setItem('nutritrack_active_plan', JSON.stringify(activePlanId));
+  }, [activePlanId]);
 
   const addFood = (food: Omit<Food, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString();
@@ -183,12 +205,95 @@ export const NutritionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
   };
 
+  // Funções para gerenciar os planos de nutrição
+  const addNutritionPlan = (plan: Omit<NutritionPlan, 'id'>) => {
+    const newPlan: NutritionPlan = {
+      id: crypto.randomUUID(),
+      ...plan,
+    };
+    setNutritionPlans((prev) => [...prev, newPlan]);
+    toast({
+      title: 'Plano adicionado',
+      description: `${plan.name} foi adicionado com sucesso.`,
+    });
+  };
+
+  const updateNutritionPlan = (updatedPlan: NutritionPlan) => {
+    setNutritionPlans((prev) =>
+      prev.map((plan) => (plan.id === updatedPlan.id ? updatedPlan : plan))
+    );
+    toast({
+      title: 'Plano atualizado',
+      description: `${updatedPlan.name} foi atualizado com sucesso.`,
+    });
+  };
+
+  const deleteNutritionPlan = (id: string) => {
+    const plan = nutritionPlans.find(p => p.id === id);
+    setNutritionPlans((prev) => prev.filter((plan) => plan.id !== id));
+    
+    // Se o plano excluído for o ativo, desativa-o
+    if (activePlanId === id) {
+      setActivePlanId(null);
+    }
+    
+    toast({
+      title: 'Plano removido',
+      description: plan ? `${plan.name} foi removido.` : 'Plano removido com sucesso.',
+      variant: 'destructive',
+    });
+  };
+
+  const setActivePlan = (planId: string | null) => {
+    setActivePlanId(planId);
+    if (planId) {
+      const plan = nutritionPlans.find(p => p.id === planId);
+      if (plan) {
+        toast({
+          title: 'Plano ativado',
+          description: `${plan.name} foi definido como plano ativo.`,
+        });
+      }
+    } else {
+      toast({
+        title: 'Plano padrão ativado',
+        description: 'As metas nutricionais padrão foram ativadas.',
+      });
+    }
+  };
+
+  // Função para obter as metas do plano ativo para uma data específica
+  const getActivePlanGoals = (date: string): DailyGoal | null => {
+    if (!activePlanId) return null;
+    
+    const activePlan = nutritionPlans.find(p => p.id === activePlanId);
+    if (!activePlan) return null;
+
+    if (activePlan.type === 'daily') {
+      // Para planos diários, retorna o mesmo valor para todos os dias
+      return activePlan.goals;
+    } else if (activePlan.type === 'weekly') {
+      // Para planos semanais (como ciclo de carboidratos), determina o dia da semana
+      const targetDate = new Date(date);
+      const dayOfWeek = targetDate.getDay(); // 0 = domingo, 1 = segunda, ... 6 = sábado
+      
+      if (activePlan.weeklyGoals && activePlan.weeklyGoals[dayOfWeek]) {
+        return activePlan.weeklyGoals[dayOfWeek];
+      }
+    }
+    
+    // Se não encontrou metas específicas para o dia ou tipo de plano não suportado
+    return null;
+  };
+
   return (
     <NutritionContext.Provider
       value={{
         foods,
         meals,
         dailyGoal,
+        nutritionPlans,
+        activePlanId,
         addFood,
         updateFood,
         deleteFood,
@@ -199,6 +304,11 @@ export const NutritionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         updateDailyGoal,
         getFood,
         getMealsForDate,
+        addNutritionPlan,
+        updateNutritionPlan,
+        deleteNutritionPlan,
+        setActivePlan,
+        getActivePlanGoals,
       }}
     >
       {children}

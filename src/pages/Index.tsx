@@ -7,13 +7,15 @@ import { QuickStats } from '@/components/dashboard/QuickStats';
 import { WeeklyProgress } from '@/components/dashboard/WeeklyProgress';
 import { formatDate, getToday } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Calendar, TrendingUp, Target, Zap, Apple } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, TrendingUp, Target, Zap, Apple, ListChecks } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import { cn } from '@/lib/utils';
+import { useNutrition } from '@/context/NutritionContext';
 
 const Index = () => {
   const [currentDate, setCurrentDate] = useState<string>(getToday());
   const { theme } = useTheme();
+  const { activePlanId, nutritionPlans } = useNutrition();
   
   // Function to navigate dates
   const changeDate = (direction: 'prev' | 'next') => {
@@ -30,6 +32,11 @@ const Index = () => {
   };
   
   const isToday = currentDate === getToday();
+  
+  // Obtenha o plano ativo para mostrar no cabeçalho quando aplicável
+  const activePlan = activePlanId 
+    ? nutritionPlans.find(p => p.id === activePlanId)
+    : null;
   
   return (
     <div className="pt-4 space-y-6">
@@ -58,6 +65,13 @@ const Index = () => {
               <Calendar className="w-4 h-4" />
               <span>{isToday ? 'Hoje' : formatDate(currentDate)}</span>
               {!isToday && <Zap className="w-3 h-3 text-amber-500" />}
+              {activePlan && (
+                <>
+                  <span className="mx-1">•</span>
+                  <ListChecks className="w-3 h-3 text-emerald-500" />
+                  <span className="text-emerald-500 font-medium">{activePlan.name}</span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -128,6 +142,20 @@ const Index = () => {
           <Zap className="w-4 h-4" />
           Gerenciar Alimentos
         </Button>
+        {activePlan && (
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn(
+              "flex items-center gap-2 whitespace-nowrap transition-all duration-200",
+              theme === 'vibrant' && "hover:bg-amber-500/20 hover:border-amber-500/50"
+            )}
+            onClick={() => window.location.href = '/advanced'}
+          >
+            <ListChecks className="w-4 h-4" />
+            Editar Plano Ativo
+          </Button>
+        )}
       </div>
       
       {/* Quick Stats */}
