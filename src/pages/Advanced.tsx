@@ -1,11 +1,9 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { 
-  Card, CardContent, CardDescription, CardFooter, 
-  CardHeader, CardTitle 
+  Card, CardContent, CardDescription, CardHeader, CardTitle 
 } from "@/components/ui/card";
-import {
+import { 
   Form, FormControl, FormDescription, FormField, FormItem, 
   FormLabel, FormMessage
 } from "@/components/ui/form";

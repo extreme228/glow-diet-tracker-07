@@ -16,7 +16,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { 
   Activity, Calendar as CalendarIcon, ChevronDown, ChevronUp, 
-  Trash2, TrendingDown, TrendingUp, Scale, ChartLineUp 
+  Trash2, TrendingDown, TrendingUp, Scale, ChartLine 
 } from 'lucide-react';
 import { cn, formatDate } from '@/lib/utils';
 import { useTheme } from '@/context/ThemeContext';
@@ -360,7 +360,7 @@ export default function Weight() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ChartLineUp className="w-5 h-5 text-primary" />
+                <ChartLine className="w-5 h-5 text-primary" />
                 Evolução Semanal
               </CardTitle>
               <CardDescription>
@@ -423,7 +423,7 @@ export default function Weight() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ChartLineUp className="w-5 h-5 text-primary" />
+                <ChartLine className="w-5 h-5 text-primary" />
                 Evolução Mensal
               </CardTitle>
               <CardDescription>
