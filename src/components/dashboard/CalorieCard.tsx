@@ -17,6 +17,23 @@ export const CalorieCard: React.FC<CalorieCardProps> = ({ date }) => {
   const caloriePercentage = Math.min(Math.round((dailyNutrition.calories / dailyGoal.calories) * 100), 100);
   const caloriesRemaining = dailyGoal.calories - dailyNutrition.calories;
   
+  // Definindo as cores do progresso baseado no tema
+  const getProgressStyles = () => {
+    if (theme === 'vibrant') {
+      return caloriePercentage > 100 
+        ? "bg-red-500 shadow-[0_0_15px_2px_rgba(255,107,107,0.4)]" 
+        : "bg-gradient-to-r from-[#00ff9d] to-[#00c3ff] shadow-[0_0_20px_2px_rgba(0,255,157,0.6)]";
+    } else if (theme === 'light') {
+      return caloriePercentage > 100 
+        ? "bg-red-500" 
+        : "bg-gradient-to-r from-emerald-500 to-blue-500";
+    } else {
+      return caloriePercentage > 100 
+        ? "bg-red-500 shadow-[0_0_15px_2px_rgba(255,107,107,0.4)]" 
+        : "bg-gradient-to-r from-emerald-500 to-blue-500 shadow-[0_0_15px_2px_rgba(52,211,153,0.4)]";
+    }
+  };
+  
   return (
     <div className={cn(
       "p-5 mb-5 animate-float rounded-xl shadow-lg relative overflow-hidden",
@@ -49,31 +66,20 @@ export const CalorieCard: React.FC<CalorieCardProps> = ({ date }) => {
         </div>
       </div>
       
-      <Progress 
-        value={caloriePercentage} 
-        className={cn(
-          "h-2.5",
-          theme === 'light' ? "bg-gray-100" : "bg-muted",
-          "[&>div]:transition-all"
-        )}
-      />
-      
-      <style jsx>{`
-        .Progress > div {
-          ${theme === 'vibrant' 
-            ? caloriePercentage > 100 
-              ? "background: #FF6B6B; box-shadow: 0 0 15px 2px rgba(255, 107, 107, 0.4);" 
-              : "background: linear-gradient(to right, #00ff9d, #00c3ff); box-shadow: 0 0 20px 2px rgba(0, 255, 157, 0.6);"
-            : theme === 'light'
-              ? caloriePercentage > 100 
-                ? "background: #FF6B6B;" 
-                : "background: linear-gradient(to right, #2CDA9D, #22A2E0);"
-              : caloriePercentage > 100 
-                ? "background: #FF6B6B; box-shadow: 0 0 15px 2px rgba(255, 107, 107, 0.4);" 
-                : "background: linear-gradient(to right, #2CDA9D, #22A2E0); box-shadow: 0 0 15px 2px rgba(44, 218, 157, 0.4);"
-          }
-        }
-      `}</style>
+      <div className="relative">
+        <div className={cn(
+          "h-2.5 rounded-full overflow-hidden",
+          theme === 'light' ? "bg-gray-100" : "bg-muted"
+        )}>
+          <div 
+            className={cn(
+              "h-full transition-all duration-300 rounded-full",
+              getProgressStyles()
+            )}
+            style={{ width: `${Math.min(caloriePercentage, 100)}%` }}
+          />
+        </div>
+      </div>
     </div>
   );
 };
