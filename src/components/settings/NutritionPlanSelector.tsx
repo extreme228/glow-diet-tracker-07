@@ -29,6 +29,9 @@ const NutritionPlanSelector = () => {
 
   // Encontre o plano ativo
   const activePlan = nutritionPlans.find(p => p.id === activePlanId);
+
+  // Verifique se há algum plano disponível
+  const hasPlans = nutritionPlans.length > 0;
   
   return (
     <div className="space-y-4">
@@ -36,25 +39,41 @@ const NutritionPlanSelector = () => {
         Escolha um plano nutricional criado na guia Avançados para ser usado como meta em vez das configurações padrão.
       </p>
       
-      <Select
-        value={activePlanId || "default"}
-        onValueChange={(value) => setActivePlan(value === "default" ? null : value)}
-      >
-        <SelectTrigger className={cn(
-          "w-full transition-all",
-          theme === 'vibrant' && "hover:border-primary focus:border-primary focus:ring-primary/20"
+      {!hasPlans ? (
+        <div className={cn(
+          "px-4 py-3 rounded-lg text-sm",
+          theme === 'light' 
+            ? "bg-amber-50 text-amber-700 border border-amber-200" 
+            : "bg-amber-950/30 text-amber-400 border border-amber-900/50"
         )}>
-          <SelectValue placeholder="Selecione um plano nutricional" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="default">Padrão (Configurações Gerais)</SelectItem>
-          {nutritionPlans.map(plan => (
-            <SelectItem key={plan.id} value={plan.id}>
-              {plan.name} - {getPlanCategoryLabel(plan.category)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+          <div className="flex items-start gap-2">
+            <InfoIcon className="w-4 h-4 mt-0.5" />
+            <p>
+              Você ainda não criou nenhum plano nutricional. Visite a aba "Avançados" para criar planos personalizados.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <Select
+          value={activePlanId || "default"}
+          onValueChange={(value) => setActivePlan(value === "default" ? null : value)}
+        >
+          <SelectTrigger className={cn(
+            "w-full transition-all",
+            theme === 'vibrant' && "hover:border-primary focus:border-primary focus:ring-primary/20"
+          )}>
+            <SelectValue placeholder="Selecione um plano nutricional" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="default">Padrão (Configurações Gerais)</SelectItem>
+            {nutritionPlans.map(plan => (
+              <SelectItem key={plan.id} value={plan.id}>
+                {plan.name} - {getPlanCategoryLabel(plan.category)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
       
       {activePlanId && activePlan && (
         <div className={cn(
