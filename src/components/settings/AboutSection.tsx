@@ -10,11 +10,10 @@ const AboutSection = () => {
   return (
     <div className="space-y-3">
       <p className="text-muted-foreground text-sm">
-        <span className="font-medium text-card-foreground">Versão 1.0.0</span>
+        <span className="font-medium text-yellow-500">Versão Definitiva</span>
       </p>
       <p className="text-sm text-muted-foreground leading-relaxed">
-        Aplicativo de controle de alimentação e acompanhamento nutricional.
-        Todos os dados são armazenados localmente no seu dispositivo para total privacidade.
+        O melhor App de Dieta que tem no mundo
       </p>
     </div>
   );

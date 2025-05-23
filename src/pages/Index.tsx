@@ -10,6 +10,7 @@ import { ChevronLeft, ChevronRight, Calendar, TrendingUp, Target, Zap, Apple, Li
 import { useTheme } from '@/context/ThemeContext';
 import { cn } from '@/lib/utils';
 import { useNutrition } from '@/context/NutritionContext';
+
 const Index = () => {
   const [currentDate, setCurrentDate] = useState<string>(getToday());
   const {
@@ -39,21 +40,37 @@ const Index = () => {
       {/* Header with enhanced design */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <div className={cn("p-3 rounded-2xl relative overflow-hidden", theme === 'light' ? "bg-gradient-to-r from-emerald-100 to-blue-100" : "bg-gradient-to-r from-emerald-500/20 to-blue-500/20")}>
-            {theme === 'vibrant' && <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/30 to-blue-500/30 animate-pulse" />}
-            <TrendingUp className="w-7 h-7 text-emerald-500 relative z-10" />
+          <div className={cn(
+            "p-3 rounded-2xl relative overflow-hidden", 
+            theme === 'light' 
+              ? "bg-gradient-to-r from-green-100 to-emerald-100" 
+              : "bg-gradient-to-r from-green-500/20 to-emerald-500/20"
+          )}>
+            {theme === 'vibrant' && (
+              <div className="absolute inset-0 bg-gradient-to-r from-green-500/30 to-emerald-500/30 animate-pulse" />
+            )}
+            <Apple className="w-7 h-7 text-green-500 relative z-10" />
           </div>
           <div>
-            <h1 className={cn("text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r", theme === 'light' ? "from-gray-800 to-gray-600" : "from-emerald-400 via-blue-400 to-purple-400")}>Dieta Do Murilao</h1>
+            <h1 className={cn(
+              "text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r", 
+              theme === 'light' 
+                ? "from-gray-800 to-gray-600" 
+                : "from-green-400 via-emerald-400 to-green-300"
+            )}>
+              Dieta Do Murilao
+            </h1>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Calendar className="w-4 h-4" />
               <span>{isToday ? 'Hoje' : formatDate(currentDate)}</span>
               {!isToday && <Zap className="w-3 h-3 text-amber-500" />}
-              {activePlan && <>
+              {activePlan && (
+                <>
                   <span className="mx-1">•</span>
                   <ListChecks className="w-3 h-3 text-emerald-500" />
                   <span className="text-emerald-500 font-medium">{activePlan.name}</span>
-                </>}
+                </>
+              )}
             </div>
           </div>
         </div>

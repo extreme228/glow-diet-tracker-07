@@ -55,7 +55,7 @@ const Settings = () => {
       
       <SettingsCard 
         icon={Info} 
-        title="Sobre o NutriTrack" 
+        title="Sobre o Dieta do Murilao" 
         iconColor="text-blue-500" 
         iconBgClass={theme === 'light' ? "bg-blue-100" : "bg-blue-500/20"}
       >
