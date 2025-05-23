@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Apple, PieChart, Settings } from 'lucide-react';
+import { Home, Apple, PieChart, Settings, Scale, Calculator } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/context/ThemeContext';
 
@@ -21,12 +21,22 @@ export const NavBar: React.FC = () => {
       path: '/foods',
     },
     {
+      label: 'Peso',
+      icon: Scale,
+      path: '/weight',
+    },
+    {
       label: 'Análise',
       icon: PieChart,
       path: '/analytics',
     },
     {
-      label: 'Configurações',
+      label: 'Avançado',
+      icon: Calculator,
+      path: '/advanced',
+    },
+    {
+      label: 'Config.',
       icon: Settings,
       path: '/settings',
     },
@@ -50,7 +60,7 @@ export const NavBar: React.FC = () => {
               key={item.path}
               to={item.path}
               className={cn(
-                'flex flex-col items-center justify-center w-1/4 py-1 transition-all duration-300 group',
+                'flex flex-col items-center justify-center w-1/6 py-1 transition-all duration-300 group',
                 isActive(item.path) 
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'

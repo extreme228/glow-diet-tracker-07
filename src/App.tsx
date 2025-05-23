@@ -14,6 +14,8 @@ import MealForm from "./pages/MealForm";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Weight from "./pages/Weight";
+import Advanced from "./pages/Advanced";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +36,8 @@ const App = () => (
                 <Route path="/add-meal" element={<MealForm />} />
                 <Route path="/edit-meal/:id" element={<MealForm />} />
                 <Route path="/analytics" element={<Analytics />} />
+                <Route path="/weight" element={<Weight />} />
+                <Route path="/advanced" element={<Advanced />} />
                 <Route path="/settings" element={<Settings />} />
               </Route>
               <Route path="*" element={<NotFound />} />
