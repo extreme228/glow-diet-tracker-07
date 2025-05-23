@@ -38,12 +38,10 @@ export const NavBar: React.FC = () => {
 
   return (
     <div className={cn(
-      "fixed bottom-0 left-0 right-0 border-t z-50",
+      "fixed bottom-0 left-0 right-0 border-t z-50 backdrop-blur-xl",
       theme === 'light' 
-        ? "bg-white border-gray-200" 
-        : theme === 'vibrant'
-          ? "bg-nutritrack-vibrant-card bg-opacity-90 backdrop-blur-lg border-nutritrack-vibrant-green/20" 
-          : "bg-nutritrack-card bg-opacity-90 backdrop-blur-lg border-white/10"
+        ? "bg-white/90 border-gray-200" 
+        : "bg-card/90 border-border"
     )}>
       <div className="container mx-auto">
         <nav className="flex justify-around items-center h-16">
@@ -52,33 +50,31 @@ export const NavBar: React.FC = () => {
               key={item.path}
               to={item.path}
               className={cn(
-                'flex flex-col items-center justify-center w-1/4 py-1 transition-all duration-300',
+                'flex flex-col items-center justify-center w-1/4 py-1 transition-all duration-300 group',
                 isActive(item.path) 
-                  ? theme === 'light'
-                    ? 'text-primary'
-                    : theme === 'vibrant'
-                      ? 'text-nutritrack-vibrant-green'
-                      : 'text-nutritrack-green'
-                  : theme === 'light'
-                    ? 'text-gray-500 hover:text-gray-800'
-                    : 'text-gray-400 hover:text-white'
+                  ? 'text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
               )}
             >
               <div 
                 className={cn(
-                  "p-1.5 rounded-full transition-all duration-300",
+                  "p-2 rounded-xl transition-all duration-300 relative overflow-hidden",
                   isActive(item.path) && (
                     theme === 'light'
-                      ? "bg-primary/10 shadow-md"
+                      ? "bg-primary/10 shadow-sm"
                       : theme === 'vibrant'
-                        ? "bg-nutritrack-vibrant-green/20 shadow-glow-vibrant animate-pulse-glow" 
-                        : "bg-nutritrack-green/20 shadow-glow-green animate-pulse-glow"
-                  )
+                        ? "bg-primary/20 shadow-glow-green/50" 
+                        : "bg-primary/20 shadow-md"
+                  ),
+                  !isActive(item.path) && "group-hover:bg-secondary/50"
                 )}
               >
-                <item.icon size={20} />
+                {isActive(item.path) && theme === 'vibrant' && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 animate-shimmer" />
+                )}
+                <item.icon size={18} className="relative z-10" />
               </div>
-              <span className="text-xs mt-1">{item.label}</span>
+              <span className="text-xs mt-1 font-medium">{item.label}</span>
             </Link>
           ))}
         </nav>

@@ -5,10 +5,13 @@ import { MacroChart } from '@/components/dashboard/MacroChart';
 import { MealsList } from '@/components/meals/MealsList';
 import { formatDate, getToday } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, TrendingUp, Target } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext';
+import { cn } from '@/lib/utils';
 
 const Index = () => {
   const [currentDate, setCurrentDate] = useState<string>(getToday());
+  const { theme } = useTheme();
   
   // Function to navigate dates
   const changeDate = (direction: 'prev' | 'next') => {
@@ -27,45 +30,67 @@ const Index = () => {
   const isToday = currentDate === getToday();
   
   return (
-    <div className="pt-4">
+    <div className="pt-4 space-y-6">
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-nutritrack-green to-nutritrack-blue">
-            NutriTrack
-          </h1>
-          <p className="text-gray-400 text-sm">
-            {isToday ? 'Hoje' : formatDate(currentDate)}
-          </p>
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "p-2 rounded-xl",
+            theme === 'light' ? "bg-primary/10" : "bg-primary/20"
+          )}>
+            <TrendingUp className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h1 className={cn(
+              "text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r",
+              theme === 'light' 
+                ? "from-gray-800 to-gray-600" 
+                : "from-primary to-accent"
+            )}>
+              NutriTrack
+            </h1>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Calendar className="w-4 h-4" />
+              <span>{isToday ? 'Hoje' : formatDate(currentDate)}</span>
+            </div>
+          </div>
         </div>
         
         <div className="flex items-center gap-2">
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
             onClick={() => changeDate('prev')}
-            className="h-8 w-8 rounded-full bg-nutritrack-card hover:bg-nutritrack-purple/20 hover:text-nutritrack-purple"
+            className={cn(
+              "h-9 w-9 rounded-full border-border hover:bg-secondary",
+              theme === 'vibrant' && "hover:bg-accent/20 hover:border-accent/50"
+            )}
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={16} />
           </Button>
           
           <Button
-            variant="ghost"
+            variant={isToday ? "default" : "outline"}
             size="sm"
             onClick={() => setCurrentDate(getToday())}
-            className={`text-xs ${
-              isToday ? 'bg-nutritrack-green/20 text-nutritrack-green' : 'bg-nutritrack-card hover:bg-nutritrack-green/10 hover:text-nutritrack-green'
-            }`}
+            className={cn(
+              "text-xs px-3",
+              isToday && theme === 'vibrant' && "bg-primary hover:bg-primary/90"
+            )}
           >
+            <Target className="w-3 h-3 mr-1" />
             Hoje
           </Button>
           
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
             onClick={() => changeDate('next')}
-            className="h-8 w-8 rounded-full bg-nutritrack-card hover:bg-nutritrack-purple/20 hover:text-nutritrack-purple"
+            className={cn(
+              "h-9 w-9 rounded-full border-border hover:bg-secondary",
+              theme === 'vibrant' && "hover:bg-accent/20 hover:border-accent/50"
+            )}
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={16} />
           </Button>
         </div>
       </div>

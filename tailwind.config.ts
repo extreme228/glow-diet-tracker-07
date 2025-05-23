@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -62,23 +63,6 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				nutritrack: {
-					green: '#2CDA9D',
-					blue: '#22A2E0',
-					purple: '#8062D6',
-					coral: '#FF6B6B',
-					yellow: '#FFD93D',
-					background: '#0F172A',
-					card: '#1E293B',
-					vibrant: '#0a1325',
-					'vibrant-card': '#172136',
-					'vibrant-green': '#00ff9d',
-					'vibrant-blue': '#00c3ff',
-					'vibrant-purple': '#a64dff',
-					light: '#f8fafc',
-					'light-card': '#ffffff',
-					'light-border': '#e2e8f0',
-				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -115,13 +99,18 @@ export default {
 				'float': {
 					'0%, 100%': { transform: 'translateY(0)' },
 					'50%': { transform: 'translateY(-5px)' }
+				},
+				'shimmer': {
+					'0%': { transform: 'translateX(-100%)' },
+					'100%': { transform: 'translateX(100%)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
-				'float': 'float 3s ease-in-out infinite'
+				'float': 'float 3s ease-in-out infinite',
+				'shimmer': 'shimmer 2s linear infinite'
 			},
 			boxShadow: {
 				'glow-green': '0 0 15px 2px rgba(44, 218, 157, 0.4)',

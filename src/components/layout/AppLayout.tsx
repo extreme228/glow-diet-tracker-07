@@ -10,12 +10,8 @@ export const AppLayout: React.FC = () => {
   
   return (
     <div className={cn(
-      "min-h-screen text-foreground",
-      theme === 'light' 
-        ? "bg-gray-50" 
-        : theme === 'vibrant'
-          ? "bg-gradient-to-b from-nutritrack-vibrant to-black" 
-          : "bg-gradient-to-b from-nutritrack-background to-background/90"
+      "min-h-screen text-foreground transition-colors duration-300",
+      "bg-background"
     )}>
       <main className="container mx-auto p-4 pb-24">
         <Outlet />

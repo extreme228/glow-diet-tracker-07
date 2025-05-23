@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { useNutrition } from '@/context/NutritionContext';
-import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/context/ThemeContext';
+import { Flame, Target, TrendingUp } from 'lucide-react';
 
 interface CalorieCardProps {
   date: string;
@@ -17,67 +17,85 @@ export const CalorieCard: React.FC<CalorieCardProps> = ({ date }) => {
   const caloriePercentage = Math.min(Math.round((dailyNutrition.calories / dailyGoal.calories) * 100), 100);
   const caloriesRemaining = dailyGoal.calories - dailyNutrition.calories;
   
-  // Definindo as cores do progresso baseado no tema
   const getProgressStyles = () => {
     if (theme === 'vibrant') {
       return caloriePercentage > 100 
-        ? "bg-red-500 shadow-[0_0_15px_2px_rgba(255,107,107,0.4)]" 
-        : "bg-gradient-to-r from-[#00ff9d] to-[#00c3ff] shadow-[0_0_20px_2px_rgba(0,255,157,0.6)]";
+        ? "bg-destructive shadow-glow-coral" 
+        : "bg-gradient-to-r from-primary to-accent shadow-glow-vibrant";
     } else if (theme === 'light') {
       return caloriePercentage > 100 
-        ? "bg-red-500" 
-        : "bg-gradient-to-r from-emerald-500 to-blue-500";
+        ? "bg-destructive" 
+        : "bg-gradient-to-r from-primary to-blue-500";
     } else {
       return caloriePercentage > 100 
-        ? "bg-red-500 shadow-[0_0_15px_2px_rgba(255,107,107,0.4)]" 
-        : "bg-gradient-to-r from-emerald-500 to-blue-500 shadow-[0_0_15px_2px_rgba(52,211,153,0.4)]";
+        ? "bg-destructive shadow-glow-coral" 
+        : "bg-gradient-to-r from-primary to-blue-500 shadow-glow-green";
     }
   };
   
   return (
     <div className={cn(
-      "p-5 mb-5 animate-float rounded-xl shadow-lg relative overflow-hidden",
-      theme === 'light' 
-        ? "bg-white border border-gray-200" 
-        : theme === 'vibrant'
-          ? "glow-card bg-nutritrack-vibrant-card border-nutritrack-vibrant-green/20" 
-          : "glow-card"
+      "glow-card p-6 animate-float transition-all duration-300 hover:scale-[1.01]",
+      theme === 'vibrant' && "hover:shadow-glow-vibrant/20"
     )}>
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className={cn(
-            "text-lg font-semibold", 
-            theme === 'light' ? "text-gray-800" : "text-foreground"
-          )}>Calorias</h3>
-          <p className="text-sm text-muted-foreground">Meta Diária</p>
+      <div className="flex justify-between items-start mb-6">
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "p-2 rounded-lg",
+            theme === 'light' ? "bg-orange-100" : "bg-orange-500/20"
+          )}>
+            <Flame className="w-5 h-5 text-orange-500" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-card-foreground">Calorias</h3>
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <Target className="w-3 h-3" />
+              <span>Meta Diária</span>
+            </div>
+          </div>
         </div>
         <div className="text-right">
-          <p className={cn(
-            "text-2xl font-bold",
-            theme === 'light' ? "text-gray-800" : "text-white"
-          )}>
-            {dailyNutrition.calories} <span className="text-xs text-muted-foreground">/ {dailyGoal.calories}</span>
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {caloriesRemaining > 0 
-              ? `${caloriesRemaining} restantes` 
-              : `${Math.abs(caloriesRemaining)} excedidas`}
-          </p>
+          <div className="flex items-baseline gap-1">
+            <span className="text-2xl font-bold text-card-foreground">
+              {dailyNutrition.calories}
+            </span>
+            <span className="text-sm text-muted-foreground">/ {dailyGoal.calories}</span>
+          </div>
+          <div className="flex items-center gap-1 text-sm">
+            <TrendingUp className="w-3 h-3" />
+            <span className={cn(
+              caloriesRemaining > 0 ? "text-muted-foreground" : "text-destructive"
+            )}>
+              {caloriesRemaining > 0 
+                ? `${caloriesRemaining} restantes` 
+                : `${Math.abs(caloriesRemaining)} excedidas`}
+            </span>
+          </div>
         </div>
       </div>
       
-      <div className="relative">
-        <div className={cn(
-          "h-2.5 rounded-full overflow-hidden",
-          theme === 'light' ? "bg-gray-100" : "bg-muted"
-        )}>
-          <div 
-            className={cn(
-              "h-full transition-all duration-300 rounded-full",
-              getProgressStyles()
-            )}
-            style={{ width: `${Math.min(caloriePercentage, 100)}%` }}
-          />
+      <div className="space-y-2">
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-muted-foreground">Progresso</span>
+          <span className="font-medium text-card-foreground">{caloriePercentage}%</span>
+        </div>
+        <div className="relative">
+          <div className={cn(
+            "h-3 rounded-full overflow-hidden",
+            theme === 'light' ? "bg-gray-100" : "bg-secondary"
+          )}>
+            <div 
+              className={cn(
+                "h-full transition-all duration-500 rounded-full relative overflow-hidden",
+                getProgressStyles()
+              )}
+              style={{ width: `${Math.min(caloriePercentage, 100)}%` }}
+            >
+              {theme === 'vibrant' && (
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

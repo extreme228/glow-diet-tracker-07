@@ -39,22 +39,22 @@
   }
 
   .dark {
-    --background: 222 47% 11%;
+    --background: 220 13% 9%;
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 18%;
+    --card: 220 13% 12%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 11%;
+    --popover: 220 13% 9%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 160 70% 50%;
-    --primary-foreground: 222 47% 11%;
+    --primary-foreground: 220 13% 9%;
 
-    --secondary: 222 47% 20%;
+    --secondary: 220 13% 16%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 222 47% 20%;
+    --muted: 220 13% 16%;
     --muted-foreground: 215 20.2% 65.1%;
 
     --accent: 270 50% 60%;
@@ -63,39 +63,39 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 222 47% 25%;
-    --input: 222 47% 25%;
+    --border: 220 13% 18%;
+    --input: 220 13% 18%;
     --ring: 160 70% 50%;
   }
 
   .vibrant {
-    --background: 217 50% 9%;
+    --background: 220 15% 6%;
     --foreground: 210 40% 98%;
 
-    --card: 217 42% 15%;
+    --card: 220 15% 8%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 217 50% 9%;
+    --popover: 220 15% 6%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 160 100% 50%;
-    --primary-foreground: 217 50% 9%;
+    --primary: 160 100% 60%;
+    --primary-foreground: 220 15% 6%;
 
-    --secondary: 217 42% 20%;
+    --secondary: 220 15% 12%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217 42% 20%;
+    --muted: 220 15% 12%;
     --muted-foreground: 215 20.2% 75%;
 
-    --accent: 283 100% 65%;
+    --accent: 283 100% 70%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 100% 65%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217 42% 25%;
-    --input: 217 42% 25%;
-    --ring: 160 100% 50%;
+    --border: 220 15% 15%;
+    --input: 220 15% 15%;
+    --ring: 160 100% 60%;
   }
 }
 
@@ -116,12 +116,11 @@
 
 @layer components {
   .glow-card {
-    @apply rounded-xl bg-card bg-opacity-70 backdrop-blur-sm border border-white/10 shadow-lg relative overflow-hidden;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+    @apply rounded-xl bg-card bg-opacity-90 backdrop-blur-sm border border-border shadow-lg relative overflow-hidden;
   }
   
   .glow-effect {
-    @apply before:content-[''] before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-r before:from-nutritrack-green/30 before:via-nutritrack-purple/30 before:to-nutritrack-blue/30 before:opacity-0 before:transition-opacity hover:before:opacity-100;
+    @apply before:content-[''] before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-r before:from-primary/20 before:via-accent/20 before:to-blue-500/20 before:opacity-0 before:transition-opacity hover:before:opacity-100;
   }
 
   .glow-button {
@@ -138,22 +137,22 @@
 
   .vibrant {
     .glow-card {
-      @apply border-nutritrack-vibrant-green/20;
-      box-shadow: 0 8px 32px 0 rgba(0, 255, 157, 0.15);
+      @apply border-accent/30;
+      box-shadow: 0 8px 32px 0 rgba(0, 255, 157, 0.1);
     }
 
     .glow-button-primary {
-      @apply from-nutritrack-vibrant-green to-nutritrack-vibrant-blue hover:shadow-glow-vibrant;
+      @apply from-primary to-blue-400 hover:shadow-glow-vibrant;
     }
 
     .glow-button-secondary {
-      @apply from-nutritrack-vibrant-purple to-nutritrack-vibrant-blue hover:shadow-glow-vibrant-purple;
+      @apply from-accent to-blue-400 hover:shadow-glow-vibrant-purple;
     }
   }
 
   .light {
     .glow-card {
-      @apply bg-white bg-opacity-100 border-nutritrack-light-border;
+      @apply bg-white bg-opacity-100 border-gray-200;
       box-shadow: 0 8px 30px 0 rgba(0, 0, 0, 0.05);
     }
   }
