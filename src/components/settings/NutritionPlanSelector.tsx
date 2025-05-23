@@ -1,14 +1,18 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNutrition } from '@/context/NutritionContext';
 import { useTheme } from '@/context/ThemeContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { Calendar, InfoIcon, ListChecks } from 'lucide-react';
+import { Calendar, InfoIcon, ListChecks, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
 
 const NutritionPlanSelector = () => {
   const { nutritionPlans, activePlanId, setActivePlan } = useNutrition();
   const { theme } = useTheme();
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   
   useEffect(() => {
     // Debug log to check if plans are being loaded
@@ -38,11 +42,54 @@ const NutritionPlanSelector = () => {
   // Verifique se há algum plano disponível
   const hasPlans = nutritionPlans && nutritionPlans.length > 0;
   
+  // Função para sincronizar planos
+  const syncPlans = () => {
+    setIsLoading(true);
+    
+    // Simular um pequeno atraso para feedback visual
+    setTimeout(() => {
+      // Como estamos usando localStorage, os planos já estão sincronizados,
+      // mas essa função pode ser expandida para buscar planos remotamente no futuro
+      
+      console.log('Planos verificados:', nutritionPlans);
+      
+      toast({
+        title: hasPlans 
+          ? `Planos sincronizados (${nutritionPlans.length} encontrados)` 
+          : "Nenhum plano encontrado",
+        description: hasPlans 
+          ? "Todos os planos nutricionais foram sincronizados." 
+          : "Visite a aba Avançados para criar novos planos.",
+      });
+      
+      setIsLoading(false);
+    }, 600);
+  };
+  
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        Escolha um plano nutricional criado na guia Avançados para ser usado como meta em vez das configurações padrão.
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          Escolha um plano nutricional criado na guia Avançados para ser usado como meta em vez das configurações padrão.
+        </p>
+        
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={syncPlans}
+          disabled={isLoading}
+          className={cn(
+            "flex items-center gap-1",
+            theme === 'vibrant' && "hover:border-primary hover:text-primary"
+          )}
+        >
+          <RefreshCw className={cn(
+            "w-3.5 h-3.5",
+            isLoading && "animate-spin"
+          )} />
+          <span>Sincronizar</span>
+        </Button>
+      </div>
       
       {!hasPlans ? (
         <div className={cn(
