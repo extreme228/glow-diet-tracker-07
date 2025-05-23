@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useNutrition } from '@/context/NutritionContext';
@@ -118,11 +117,18 @@ const MealForm = () => {
       formattedTime = `${time.slice(0, 2)}:${time.slice(2, 4)}`;
     }
     
+    // Create meal items with proper IDs
+    const mealItems = items.map(({ foodId, quantity }) => ({ 
+      id: crypto.randomUUID(),
+      foodId, 
+      quantity 
+    }));
+    
     const mealData = {
       name,
       date,
       time: formattedTime,
-      items: items.map(({ foodId, quantity }) => ({ foodId, quantity })),
+      items: mealItems,
     };
     
     if (isEditMode && id) {

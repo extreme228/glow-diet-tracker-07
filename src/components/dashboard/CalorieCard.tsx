@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNutrition } from '@/context/NutritionContext';
 import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 
 interface CalorieCardProps {
   date: string;
@@ -33,16 +34,14 @@ export const CalorieCard: React.FC<CalorieCardProps> = ({ date }) => {
       
       <Progress 
         value={caloriePercentage} 
-        className="h-2.5 bg-gray-700"
-        indicatorClassName={cn(
-          "transition-all",
+        className={cn(
+          "h-2.5 bg-gray-700",
+          "[&>div]:transition-all",
           caloriePercentage > 100 
-            ? "bg-nutritrack-coral shadow-glow-coral" 
-            : "bg-gradient-to-r from-nutritrack-green to-nutritrack-blue shadow-glow-green"
+            ? "[&>div]:bg-nutritrack-coral [&>div]:shadow-glow-coral" 
+            : "[&>div]:bg-gradient-to-r [&>div]:from-nutritrack-green [&>div]:to-nutritrack-blue [&>div]:shadow-glow-green"
         )}
       />
     </div>
   );
 };
-
-import { cn } from '@/lib/utils';
