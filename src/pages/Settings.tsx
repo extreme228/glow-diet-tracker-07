@@ -1,41 +1,18 @@
 
-import React, { useState } from 'react';
-import { useNutrition } from '@/context/NutritionContext';
+import React from 'react';
+import { Settings as SettingsIcon, Target, Info, ListChecks, Moon, Sun, Sparkles } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/components/ui/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Moon, Sun, Sparkles, Settings as SettingsIcon, Target, Info, Save, ListChecks } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Import the smaller components
+import ThemeSelector from '@/components/settings/ThemeSelector';
+import NutritionPlanSelector from '@/components/settings/NutritionPlanSelector';
+import NutritionGoalsForm from '@/components/settings/NutritionGoalsForm';
+import AboutSection from '@/components/settings/AboutSection';
+import SettingsCard from '@/components/settings/SettingsCard';
+
 const Settings = () => {
-  const { dailyGoal, updateDailyGoal, nutritionPlans, activePlanId, setActivePlan } = useNutrition();
-  const { theme, setTheme } = useTheme();
-  const { toast } = useToast();
-  
-  const [calories, setCalories] = useState(dailyGoal.calories.toString());
-  const [protein, setProtein] = useState(dailyGoal.protein.toString());
-  const [carbs, setCarbs] = useState(dailyGoal.carbs.toString());
-  const [fat, setFat] = useState(dailyGoal.fat.toString());
-  
-  const handleUpdateGoals = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    updateDailyGoal({
-      calories: parseFloat(calories),
-      protein: parseFloat(protein),
-      carbs: parseFloat(carbs),
-      fat: parseFloat(fat)
-    });
-    
-    toast({
-      title: "Metas atualizadas",
-      description: "Suas metas nutricionais foram salvas com sucesso.",
-    });
-  };
+  const { theme } = useTheme();
   
   return (
     <div className="pt-4 space-y-6">
@@ -49,253 +26,41 @@ const Settings = () => {
         <h1 className="text-2xl font-bold text-card-foreground">Configurações</h1>
       </div>
       
-      <div className={cn(
-        "glow-card p-6 transition-all duration-300 hover:scale-[1.01]",
-        theme === 'vibrant' && "hover:shadow-glow-vibrant/20"
-      )}>
-        <div className="flex items-center gap-3 mb-6">
-          <div className={cn(
-            "p-2 rounded-lg",
-            theme === 'light' ? "bg-purple-100" : "bg-purple-500/20"
-          )}>
-            <Sparkles className="w-5 h-5 text-purple-500" />
-          </div>
-          <h2 className="text-lg font-semibold text-card-foreground">Tema</h2>
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          <Button
-            variant={theme === 'light' ? 'default' : 'outline'}
-            onClick={() => setTheme('light')}
-            className={cn(
-              "flex flex-col items-center gap-3 py-8 h-auto transition-all duration-200 hover:scale-105",
-              theme === 'light' && "bg-primary hover:bg-primary/90"
-            )}
-          >
-            <Sun size={28} />
-            <span className="font-medium">Claro</span>
-          </Button>
-          <Button
-            variant={theme === 'dark' ? 'default' : 'outline'}
-            onClick={() => setTheme('dark')}
-            className={cn(
-              "flex flex-col items-center gap-3 py-8 h-auto transition-all duration-200 hover:scale-105",
-              theme === 'dark' && "bg-primary hover:bg-primary/90"
-            )}
-          >
-            <Moon size={28} />
-            <span className="font-medium">Escuro</span>
-          </Button>
-          <Button
-            variant={theme === 'vibrant' ? 'default' : 'outline'}
-            onClick={() => setTheme('vibrant')}
-            className={cn(
-              "flex flex-col items-center gap-3 py-8 h-auto transition-all duration-200 hover:scale-105",
-              theme === 'vibrant' && "bg-primary hover:bg-primary/90 shadow-glow-vibrant"
-            )}
-          >
-            <Sparkles size={28} />
-            <span className="font-medium">Vibrante</span>
-          </Button>
-        </div>
-      </div>
+      <SettingsCard 
+        icon={Sparkles} 
+        title="Tema" 
+        iconColor="text-purple-500" 
+        iconBgClass={theme === 'light' ? "bg-purple-100" : "bg-purple-500/20"}
+      >
+        <ThemeSelector />
+      </SettingsCard>
 
-      {/* Plano Nutricional Ativo */}
-      <div className={cn(
-        "glow-card p-6 transition-all duration-300 hover:scale-[1.01]",
-        theme === 'vibrant' && "hover:shadow-glow-vibrant/20"
-      )}>
-        <div className="flex items-center gap-3 mb-6">
-          <div className={cn(
-            "p-2 rounded-lg",
-            theme === 'light' ? "bg-amber-100" : "bg-amber-500/20"
-          )}>
-            <ListChecks className="w-5 h-5 text-amber-500" />
-          </div>
-          <h2 className="text-lg font-semibold text-card-foreground">Plano Nutricional Ativo</h2>
-        </div>
-        
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Escolha um plano nutricional criado na guia Avançados para ser usado como meta em vez das configurações padrão.
-          </p>
-          
-          <Select
-            value={activePlanId || "default"}
-            onValueChange={(value) => setActivePlan(value === "default" ? null : value)}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Selecione um plano nutricional" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="default">Padrão (Configurações Gerais)</SelectItem>
-              {nutritionPlans.map(plan => (
-                <SelectItem key={plan.id} value={plan.id}>
-                  {plan.name} - {plan.category === 'carb-cycling' ? 'Ciclo de Carboidratos' : 
-                               plan.category === 'bulking' ? 'Bulking' :
-                               plan.category === 'cutting' ? 'Cutting' :
-                               plan.category === 'maintenance' ? 'Manutenção' : 'Personalizado'}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          {activePlanId && (
-            <div className="mt-2 p-3 rounded-lg bg-muted/50 text-sm">
-              <p className="font-medium text-card-foreground">
-                Plano ativo: {nutritionPlans.find(p => p.id === activePlanId)?.name}
-              </p>
-              <p className="text-muted-foreground">
-                {nutritionPlans.find(p => p.id === activePlanId)?.type === 'weekly' 
-                  ? 'Este plano usa valores diferentes para cada dia da semana.'
-                  : 'Este plano usa os mesmos valores para todos os dias.'}
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+      <SettingsCard 
+        icon={ListChecks} 
+        title="Plano Nutricional Ativo" 
+        iconColor="text-amber-500" 
+        iconBgClass={theme === 'light' ? "bg-amber-100" : "bg-amber-500/20"}
+      >
+        <NutritionPlanSelector />
+      </SettingsCard>
       
-      <div className={cn(
-        "glow-card p-6 transition-all duration-300 hover:scale-[1.01]",
-        theme === 'vibrant' && "hover:shadow-glow-vibrant/20"
-      )}>
-        <div className="flex items-center gap-3 mb-6">
-          <div className={cn(
-            "p-2 rounded-lg",
-            theme === 'light' ? "bg-green-100" : "bg-green-500/20"
-          )}>
-            <Target className="w-5 h-5 text-green-500" />
-          </div>
-          <h2 className="text-lg font-semibold text-card-foreground">Metas Nutricionais Padrão</h2>
-        </div>
-        
-        <form onSubmit={handleUpdateGoals} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="calories" className="text-card-foreground font-medium">
-              Meta de Calorias Diárias (kcal)
-            </Label>
-            <Input
-              id="calories"
-              type="number"
-              required
-              value={calories}
-              onChange={(e) => setCalories(e.target.value)}
-              min="0"
-              step="50"
-              className={cn(
-                "transition-all duration-200 focus:scale-[1.01]",
-                theme === 'vibrant' && "focus:border-primary focus:shadow-glow-vibrant/50"
-              )}
-            />
-          </div>
-          
-          <Separator className="bg-border" />
-          
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium text-card-foreground flex items-center gap-2">
-              <span>Macronutrientes (g)</span>
-            </h3>
-            
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="protein" className="text-green-500 font-medium flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
-                  Proteínas
-                </Label>
-                <Input
-                  id="protein"
-                  type="number"
-                  required
-                  value={protein}
-                  onChange={(e) => setProtein(e.target.value)}
-                  min="0"
-                  step="1"
-                  className={cn(
-                    "transition-all duration-200 focus:scale-[1.01]",
-                    theme === 'vibrant' && "focus:border-green-500 focus:shadow-glow-green/50"
-                  )}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="carbs" className="text-blue-500 font-medium flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-blue-500" />
-                  Carboidratos
-                </Label>
-                <Input
-                  id="carbs"
-                  type="number"
-                  required
-                  value={carbs}
-                  onChange={(e) => setCarbs(e.target.value)}
-                  min="0"
-                  step="1"
-                  className={cn(
-                    "transition-all duration-200 focus:scale-[1.01]",
-                    theme === 'vibrant' && "focus:border-blue-500 focus:shadow-glow-blue/50"
-                  )}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="fat" className="text-purple-500 font-medium flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-purple-500" />
-                  Gorduras
-                </Label>
-                <Input
-                  id="fat"
-                  type="number"
-                  required
-                  value={fat}
-                  onChange={(e) => setFat(e.target.value)}
-                  min="0"
-                  step="1"
-                  className={cn(
-                    "transition-all duration-200 focus:scale-[1.01]",
-                    theme === 'vibrant' && "focus:border-purple-500 focus:shadow-glow-purple/50"
-                  )}
-                />
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex justify-end mt-8">
-            <Button 
-              type="submit" 
-              className={cn(
-                "flex items-center gap-2 transition-all duration-200 hover:scale-105",
-                theme === 'vibrant' && "bg-primary hover:bg-primary/90 shadow-glow-vibrant"
-              )}
-            >
-              <Save className="w-4 h-4" />
-              Salvar Alterações
-            </Button>
-          </div>
-        </form>
-      </div>
+      <SettingsCard 
+        icon={Target} 
+        title="Metas Nutricionais Padrão" 
+        iconColor="text-green-500" 
+        iconBgClass={theme === 'light' ? "bg-green-100" : "bg-green-500/20"}
+      >
+        <NutritionGoalsForm />
+      </SettingsCard>
       
-      <div className={cn(
-        "glow-card p-6 transition-all duration-300 hover:scale-[1.01]",
-        theme === 'vibrant' && "hover:shadow-glow-vibrant/20"
-      )}>
-        <div className="flex items-center gap-3 mb-4">
-          <div className={cn(
-            "p-2 rounded-lg",
-            theme === 'light' ? "bg-blue-100" : "bg-blue-500/20"
-          )}>
-            <Info className="w-5 h-5 text-blue-500" />
-          </div>
-          <h2 className="text-lg font-semibold text-card-foreground">Sobre o NutriTrack</h2>
-        </div>
-        <div className="space-y-3">
-          <p className="text-muted-foreground text-sm">
-            <span className="font-medium text-card-foreground">Versão 1.0.0</span>
-          </p>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Aplicativo de controle de alimentação e acompanhamento nutricional.
-            Todos os dados são armazenados localmente no seu dispositivo para total privacidade.
-          </p>
-        </div>
-      </div>
+      <SettingsCard 
+        icon={Info} 
+        title="Sobre o NutriTrack" 
+        iconColor="text-blue-500" 
+        iconBgClass={theme === 'light' ? "bg-blue-100" : "bg-blue-500/20"}
+      >
+        <AboutSection />
+      </SettingsCard>
     </div>
   );
 };
