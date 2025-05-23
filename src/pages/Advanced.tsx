@@ -15,10 +15,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Calculator, Flame, ChevronDown, ChevronUp, 
   Activity, Target, Dumbbell, ArrowUpDown, Minus, Plus,
-  Zap, Calendar, LineChart, Scale, Heart, PieChart 
+  Zap, Calendar, LineChart, Scale, Heart, PieChart,
+  Save, Delete, Edit, Check, Clipboard, ClipboardCheck
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
@@ -62,11 +64,60 @@ type DietPlan = {
   notes: string[];
 };
 
+// Type para o plano personalizado
+type CustomPlan = {
+  id: string;
+  name: string;
+  type: 'carb-cycling' | 'cutting' | 'bulking' | 'peak-week' | 'custom';
+  notes: string;
+  days: CustomPlanDay[];
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type CustomPlanDay = {
+  dayOfWeek: 'second' | 'third' | 'fourth' | 'fifth' | 'sixth' | 'saturday' | 'sunday';
+  dayName: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  notes: string;
+};
+
+// Schema para validação do formulário de plano personalizado
+const customPlanFormSchema = z.object({
+  name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
+  type: z.enum(['carb-cycling', 'cutting', 'bulking', 'peak-week', 'custom']),
+  notes: z.string().optional(),
+});
+
+// Schema para validação do formulário de dia do plano
+const planDayFormSchema = z.object({
+  dayOfWeek: z.enum(['second', 'third', 'fourth', 'fifth', 'sixth', 'saturday', 'sunday']),
+  calories: z.coerce.number().min(500).max(10000),
+  protein: z.coerce.number().min(10).max(500),
+  carbs: z.coerce.number().min(10).max(1000),
+  fats: z.coerce.number().min(10).max(300),
+  notes: z.string().optional(),
+});
+
 export default function Advanced() {
   const { theme } = useTheme();
   const [tmrResult, setTmrResult] = useState<TmrResult | null>(null);
   const [selectedDietPlan, setSelectedDietPlan] = useState<string | null>(null);
   const [carbCyclingDay, setCarbCyclingDay] = useState<'low' | 'medium' | 'high'>('low');
+  
+  // Estados para a seção de planejamento
+  const [customPlans, setCustomPlans] = useState<CustomPlan[]>(() => {
+    const savedPlans = localStorage.getItem('nutritionCustomPlans');
+    return savedPlans ? JSON.parse(savedPlans) : [];
+  });
+  const [selectedPlan, setSelectedPlan] = useState<CustomPlan | null>(null);
+  const [isCreatingPlan, setIsCreatingPlan] = useState(false);
+  const [isEditingDay, setIsEditingDay] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<CustomPlanDay | null>(null);
+  const [editingDayIndex, setEditingDayIndex] = useState<number>(-1);
   
   // Form para calculadora TMB
   const form = useForm<z.infer<typeof tmrFormSchema>>({
@@ -77,6 +128,29 @@ export default function Advanced() {
       weight: 70,
       height: 170,
       activityLevel: 'moderate',
+    },
+  });
+  
+  // Form para novo plano
+  const planForm = useForm<z.infer<typeof customPlanFormSchema>>({
+    resolver: zodResolver(customPlanFormSchema),
+    defaultValues: {
+      name: "",
+      type: "custom",
+      notes: "",
+    },
+  });
+  
+  // Form para dia do plano
+  const dayForm = useForm<z.infer<typeof planDayFormSchema>>({
+    resolver: zodResolver(planDayFormSchema),
+    defaultValues: {
+      dayOfWeek: "second",
+      calories: 2000,
+      protein: 150,
+      carbs: 200,
+      fats: 70,
+      notes: "",
     },
   });
   
@@ -130,6 +204,161 @@ export default function Advanced() {
     });
     
     toast.success("Cálculo realizado com sucesso!");
+  };
+  
+  // Criar novo plano personalizado
+  const createNewPlan = (data: z.infer<typeof customPlanFormSchema>) => {
+    const newPlan: CustomPlan = {
+      id: `plan-${Date.now()}`,
+      name: data.name,
+      type: data.type,
+      notes: data.notes || "",
+      days: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    
+    // Adicionar dias da semana vazios
+    const daysOfWeek = [
+      { id: 'second', name: 'Segunda-feira' },
+      { id: 'third', name: 'Terça-feira' },
+      { id: 'fourth', name: 'Quarta-feira' },
+      { id: 'fifth', name: 'Quinta-feira' },
+      { id: 'sixth', name: 'Sexta-feira' },
+      { id: 'saturday', name: 'Sábado' },
+      { id: 'sunday', name: 'Domingo' },
+    ];
+    
+    newPlan.days = daysOfWeek.map(day => ({
+      dayOfWeek: day.id as any,
+      dayName: day.name,
+      calories: 0,
+      protein: 0,
+      carbs: 0,
+      fats: 0,
+      notes: "",
+    }));
+    
+    setCustomPlans(prev => {
+      const updated = [...prev, newPlan];
+      localStorage.setItem('nutritionCustomPlans', JSON.stringify(updated));
+      return updated;
+    });
+    
+    setSelectedPlan(newPlan);
+    setIsCreatingPlan(false);
+    planForm.reset();
+    
+    toast.success("Plano criado com sucesso!");
+  };
+  
+  // Salvar dia do plano
+  const savePlanDay = (data: z.infer<typeof planDayFormSchema>) => {
+    if (!selectedPlan) return;
+    
+    const updatedPlan = { ...selectedPlan };
+    const dayNames: Record<string, string> = {
+      'second': 'Segunda-feira',
+      'third': 'Terça-feira',
+      'fourth': 'Quarta-feira',
+      'fifth': 'Quinta-feira',
+      'sixth': 'Sexta-feira',
+      'saturday': 'Sábado',
+      'sunday': 'Domingo',
+    };
+    
+    const dayData: CustomPlanDay = {
+      dayOfWeek: data.dayOfWeek,
+      dayName: dayNames[data.dayOfWeek],
+      calories: data.calories,
+      protein: data.protein,
+      carbs: data.carbs,
+      fats: data.fats,
+      notes: data.notes || "",
+    };
+    
+    if (editingDayIndex > -1) {
+      // Editando dia existente
+      updatedPlan.days[editingDayIndex] = dayData;
+    } else {
+      // Adicionando novo dia
+      updatedPlan.days.push(dayData);
+    }
+    
+    updatedPlan.updatedAt = new Date();
+    
+    setSelectedPlan(updatedPlan);
+    setCustomPlans(prev => {
+      const updatedPlans = prev.map(p => 
+        p.id === updatedPlan.id ? updatedPlan : p
+      );
+      localStorage.setItem('nutritionCustomPlans', JSON.stringify(updatedPlans));
+      return updatedPlans;
+    });
+    
+    setIsEditingDay(false);
+    setSelectedDay(null);
+    setEditingDayIndex(-1);
+    dayForm.reset({
+      dayOfWeek: "second",
+      calories: 2000,
+      protein: 150,
+      carbs: 200,
+      fats: 70,
+      notes: "",
+    });
+    
+    toast.success("Dia atualizado com sucesso!");
+  };
+  
+  // Editar dia do plano
+  const editDay = (day: CustomPlanDay, index: number) => {
+    setSelectedDay(day);
+    setEditingDayIndex(index);
+    setIsEditingDay(true);
+    
+    dayForm.reset({
+      dayOfWeek: day.dayOfWeek,
+      calories: day.calories,
+      protein: day.protein,
+      carbs: day.carbs,
+      fats: day.fats,
+      notes: day.notes || "",
+    });
+  };
+  
+  // Excluir plano
+  const deletePlan = (planId: string) => {
+    setCustomPlans(prev => {
+      const updatedPlans = prev.filter(p => p.id !== planId);
+      localStorage.setItem('nutritionCustomPlans', JSON.stringify(updatedPlans));
+      return updatedPlans;
+    });
+    
+    if (selectedPlan?.id === planId) {
+      setSelectedPlan(null);
+    }
+    
+    toast.success("Plano excluído com sucesso!");
+  };
+  
+  // Usado para copiar valores da caluladora para o dia
+  const copyFromCalculator = () => {
+    if (!tmrResult) {
+      toast.error("Calcule seus valores primeiro!");
+      return;
+    }
+    
+    const avgProtein = Math.round((tmrResult.protein.min + tmrResult.protein.max) / 2);
+    const avgCarbs = Math.round((tmrResult.carbs.min + tmrResult.carbs.max) / 2);
+    const avgFats = Math.round((tmrResult.fats.min + tmrResult.fats.max) / 2);
+    
+    dayForm.setValue("calories", tmrResult.maintenance);
+    dayForm.setValue("protein", avgProtein);
+    dayForm.setValue("carbs", avgCarbs);
+    dayForm.setValue("fats", avgFats);
+    
+    toast.success("Valores copiados da calculadora!");
   };
 
   // Planos de dieta disponíveis
@@ -274,6 +503,10 @@ export default function Advanced() {
           <TabsTrigger value="carb-cycling">
             <ArrowUpDown className="w-4 h-4 mr-2" />
             Ciclo de Carboidratos
+          </TabsTrigger>
+          <TabsTrigger value="planning">
+            <ClipboardCheck className="w-4 h-4 mr-2" />
+            Meu Planejamento
           </TabsTrigger>
         </TabsList>
         
@@ -1345,6 +1578,402 @@ export default function Advanced() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </TabsContent>
+        
+        {/* Nova Tab de Planejamento */}
+        <TabsContent value="planning">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="md:col-span-1">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ClipboardCheck className="w-5 h-5 text-primary" />
+                  Meu Planejamento
+                </CardTitle>
+                <CardDescription>
+                  Crie e gerencie seus planos personalizados
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isCreatingPlan ? (
+                  <Form {...planForm}>
+                    <form onSubmit={planForm.handleSubmit(createNewPlan)} className="space-y-4">
+                      <FormField
+                        control={planForm.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nome do Plano</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Ex: Meu Ciclo de Carboidratos" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={planForm.control}
+                        name="type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tipo do Plano</FormLabel>
+                            <Select 
+                              onValueChange={field.onChange} 
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione o tipo" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="carb-cycling">Ciclo de Carboidratos</SelectItem>
+                                <SelectItem value="cutting">Cutting (Perda de Peso)</SelectItem>
+                                <SelectItem value="bulking">Bulking (Ganho de Massa)</SelectItem>
+                                <SelectItem value="peak-week">Peak Week</SelectItem>
+                                <SelectItem value="custom">Personalizado</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={planForm.control}
+                        name="notes"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Observações</FormLabel>
+                            <FormControl>
+                              <Textarea 
+                                placeholder="Notas sobre seu plano..." 
+                                className="resize-none" 
+                                rows={3}
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div className="flex gap-2 pt-2">
+                        <Button type="submit" className="flex-1">
+                          Criar Plano
+                        </Button>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={() => setIsCreatingPlan(false)}
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                ) : (
+                  <div className="space-y-4">
+                    {customPlans.length > 0 ? (
+                      <div className="space-y-2">
+                        {customPlans.map((plan) => (
+                          <div 
+                            key={plan.id}
+                            className={cn(
+                              "p-3 border rounded-lg flex justify-between items-center cursor-pointer",
+                              selectedPlan?.id === plan.id && "bg-primary/10 border-primary/30"
+                            )}
+                            onClick={() => setSelectedPlan(plan)}
+                          >
+                            <div className="flex items-center gap-3">
+                              {plan.type === 'carb-cycling' && <ArrowUpDown className="w-4 h-4 text-indigo-500" />}
+                              {plan.type === 'cutting' && <Minus className="w-4 h-4 text-blue-500" />}
+                              {plan.type === 'bulking' && <Plus className="w-4 h-4 text-amber-500" />}
+                              {plan.type === 'peak-week' && <Zap className="w-4 h-4 text-purple-500" />}
+                              {plan.type === 'custom' && <Clipboard className="w-4 h-4 text-emerald-500" />}
+                              <span className="font-medium">{plan.name}</span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deletePlan(plan.id);
+                              }}
+                            >
+                              <Delete className="w-4 h-4 text-muted-foreground" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="py-8 text-center">
+                        <ClipboardCheck className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                        <h3 className="text-lg font-medium mb-1">Nenhum plano criado</h3>
+                        <p className="text-muted-foreground text-sm mb-4">
+                          Crie seu primeiro plano personalizado
+                        </p>
+                      </div>
+                    )}
+                    
+                    <Button 
+                      className="w-full" 
+                      onClick={() => setIsCreatingPlan(true)}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Criar Novo Plano
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+            
+            {selectedPlan ? (
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        {selectedPlan.type === 'carb-cycling' && <ArrowUpDown className="w-5 h-5 text-primary" />}
+                        {selectedPlan.type === 'cutting' && <Minus className="w-5 h-5 text-primary" />}
+                        {selectedPlan.type === 'bulking' && <Plus className="w-5 h-5 text-primary" />}
+                        {selectedPlan.type === 'peak-week' && <Zap className="w-5 h-5 text-primary" />}
+                        {selectedPlan.type === 'custom' && <Clipboard className="w-5 h-5 text-primary" />}
+                        {selectedPlan.name}
+                      </CardTitle>
+                      <CardDescription>
+                        {selectedPlan.type === 'carb-cycling' && "Plano de ciclo de carboidratos"}
+                        {selectedPlan.type === 'cutting' && "Plano para perda de peso"}
+                        {selectedPlan.type === 'bulking' && "Plano para ganho de massa"}
+                        {selectedPlan.type === 'peak-week' && "Plano para semana de pico"}
+                        {selectedPlan.type === 'custom' && "Plano personalizado"}
+                        {selectedPlan.notes && ` - ${selectedPlan.notes}`}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {isEditingDay ? (
+                    <Form {...dayForm}>
+                      <form onSubmit={dayForm.handleSubmit(savePlanDay)} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={dayForm.control}
+                            name="dayOfWeek"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Dia da Semana</FormLabel>
+                                <Select 
+                                  onValueChange={field.onChange} 
+                                  defaultValue={field.value}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Selecione o dia" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="second">Segunda-feira</SelectItem>
+                                    <SelectItem value="third">Terça-feira</SelectItem>
+                                    <SelectItem value="fourth">Quarta-feira</SelectItem>
+                                    <SelectItem value="fifth">Quinta-feira</SelectItem>
+                                    <SelectItem value="sixth">Sexta-feira</SelectItem>
+                                    <SelectItem value="saturday">Sábado</SelectItem>
+                                    <SelectItem value="sunday">Domingo</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={dayForm.control}
+                            name="calories"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Calorias (kcal)</FormLabel>
+                                <FormControl>
+                                  <Input type="number" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <FormField
+                            control={dayForm.control}
+                            name="protein"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Proteínas (g)</FormLabel>
+                                <FormControl>
+                                  <Input type="number" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={dayForm.control}
+                            name="carbs"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Carboidratos (g)</FormLabel>
+                                <FormControl>
+                                  <Input type="number" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={dayForm.control}
+                            name="fats"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Gorduras (g)</FormLabel>
+                                <FormControl>
+                                  <Input type="number" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        
+                        <FormField
+                          control={dayForm.control}
+                          name="notes"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Anotações para este dia</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Ex: Treino de pernas, dia de descanso, etc." 
+                                  className="resize-none" 
+                                  rows={3}
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <div className="flex flex-col md:flex-row gap-2 pt-2">
+                          <Button type="submit" className="flex-1">
+                            <Save className="w-4 h-4 mr-2" />
+                            Salvar
+                          </Button>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={() => setIsEditingDay(false)}
+                            className="flex-1"
+                          >
+                            Cancelar
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            onClick={copyFromCalculator}
+                            className="flex-1"
+                          >
+                            <Calculator className="w-4 h-4 mr-2" />
+                            Copiar da Calculadora
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  ) : (
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-medium">Dias da Semana</h3>
+                      </div>
+                      
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Dia</TableHead>
+                              <TableHead>Calorias</TableHead>
+                              <TableHead>Proteínas</TableHead>
+                              <TableHead>Carboidratos</TableHead>
+                              <TableHead>Gorduras</TableHead>
+                              <TableHead className="text-right">Ações</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {selectedPlan.days.map((day, index) => (
+                              <TableRow key={day.dayOfWeek}>
+                                <TableCell className="font-medium">{day.dayName}</TableCell>
+                                <TableCell>
+                                  {day.calories > 0 ? `${day.calories} kcal` : '-'}
+                                </TableCell>
+                                <TableCell>
+                                  {day.protein > 0 ? `${day.protein}g` : '-'}
+                                </TableCell>
+                                <TableCell>
+                                  {day.carbs > 0 ? `${day.carbs}g` : '-'}
+                                </TableCell>
+                                <TableCell>
+                                  {day.fats > 0 ? `${day.fats}g` : '-'}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => editDay(day, index)}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                      
+                      {selectedPlan.days.some(day => day.notes) && (
+                        <div>
+                          <h3 className="text-lg font-medium mb-2">Anotações</h3>
+                          <div className="space-y-2">
+                            {selectedPlan.days.filter(day => day.notes).map((day) => (
+                              <div 
+                                key={day.dayOfWeek}
+                                className={cn(
+                                  "p-3 rounded-lg border",
+                                  theme === 'vibrant' && "bg-background/30"
+                                )}
+                              >
+                                <h4 className="font-medium mb-1">{day.dayName}</h4>
+                                <p className="text-sm text-muted-foreground">{day.notes}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : customPlans.length > 0 ? (
+              <Card className="md:col-span-2 flex flex-col items-center justify-center">
+                <CardContent className="py-12 text-center">
+                  <ClipboardCheck className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Selecione um plano</h3>
+                  <p className="text-muted-foreground">
+                    Escolha um plano na lista à esquerda para visualizar e editar
+                  </p>
+                </CardContent>
+              </Card>
+            ) : null}
           </div>
         </TabsContent>
       </Tabs>
