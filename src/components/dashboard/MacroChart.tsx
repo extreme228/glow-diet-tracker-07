@@ -3,6 +3,7 @@ import React from 'react';
 import { useNutrition } from '@/context/NutritionContext';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { cn } from '@/lib/utils';
+import { useTheme } from '@/context/ThemeContext';
 
 interface MacroChartProps {
   date: string;
@@ -10,25 +11,50 @@ interface MacroChartProps {
 
 export const MacroChart: React.FC<MacroChartProps> = ({ date }) => {
   const { getDailyNutrition } = useNutrition();
+  const { theme } = useTheme();
   const dailyNutrition = getDailyNutrition(date);
+
+  const getThemeColors = () => {
+    if (theme === 'vibrant') {
+      return {
+        protein: '#00ff9d',
+        carbs: '#00c3ff',
+        fat: '#a64dff'
+      };
+    } else if (theme === 'light') {
+      return {
+        protein: '#2CDA9D',
+        carbs: '#22A2E0',
+        fat: '#8062D6'
+      };
+    } else {
+      return {
+        protein: '#2CDA9D',
+        carbs: '#22A2E0',
+        fat: '#8062D6'
+      };
+    }
+  };
+
+  const colors = getThemeColors();
 
   const data = [
     {
       name: 'Proteínas',
       value: dailyNutrition.protein,
-      color: '#2CDA9D',
+      color: colors.protein,
       unit: 'g',
     },
     {
       name: 'Carboidratos',
       value: dailyNutrition.carbs,
-      color: '#22A2E0',
+      color: colors.carbs,
       unit: 'g',
     },
     {
       name: 'Gorduras',
       value: dailyNutrition.fat,
-      color: '#8062D6',
+      color: colors.fat,
       unit: 'g',
     },
   ];
@@ -39,7 +65,14 @@ export const MacroChart: React.FC<MacroChartProps> = ({ date }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="glow-card p-2 text-sm">
+        <div className={cn(
+          "p-2 text-sm rounded-lg shadow-lg",
+          theme === 'light' 
+            ? "bg-white text-gray-800 border border-gray-200" 
+            : theme === 'vibrant'
+              ? "bg-nutritrack-vibrant-card text-white border border-nutritrack-vibrant-green/20" 
+              : "glow-card"
+        )}>
           <p className="font-semibold">{`${data.name}: ${data.value}${data.unit}`}</p>
         </div>
       );
@@ -48,8 +81,18 @@ export const MacroChart: React.FC<MacroChartProps> = ({ date }) => {
   };
 
   return (
-    <div className="glow-card p-5 mb-5">
-      <h3 className="text-lg font-semibold mb-4 text-white">Macronutrientes</h3>
+    <div className={cn(
+      "p-5 mb-5 rounded-xl shadow-lg relative overflow-hidden",
+      theme === 'light' 
+        ? "bg-white border border-gray-200" 
+        : theme === 'vibrant'
+          ? "glow-card bg-nutritrack-vibrant-card border-nutritrack-vibrant-green/20" 
+          : "glow-card"
+    )}>
+      <h3 className={cn(
+        "text-lg font-semibold mb-4",
+        theme === 'light' ? "text-gray-800" : "text-white"
+      )}>Macronutrientes</h3>
 
       <div className="flex flex-col items-center">
         <div className="w-full h-48 mb-4">
@@ -70,7 +113,10 @@ export const MacroChart: React.FC<MacroChartProps> = ({ date }) => {
                       key={`cell-${index}`} 
                       fill={entry.color} 
                       stroke={entry.color}
-                      className="filter drop-shadow-md hover:filter hover:drop-shadow-xl transition-all duration-300"
+                      className={cn(
+                        "transition-all duration-300",
+                        theme === 'vibrant' ? "filter drop-shadow-lg hover:filter hover:brightness-110" : ""
+                      )}
                     />
                   ))}
                 </Pie>
@@ -78,7 +124,7 @@ export const MacroChart: React.FC<MacroChartProps> = ({ date }) => {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-500">
+            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
               <p>Sem dados para exibir</p>
             </div>
           )}
@@ -88,15 +134,14 @@ export const MacroChart: React.FC<MacroChartProps> = ({ date }) => {
           {data.map((macro, index) => (
             <div key={index} className="text-center">
               <div 
-                className={cn(
-                  "w-3 h-3 rounded-full mx-auto mb-1",
-                  `bg-[${macro.color}]`,
-                  "shadow-md"
-                )}
+                className="w-3 h-3 rounded-full mx-auto mb-1 shadow-md"
                 style={{ backgroundColor: macro.color }}
               />
-              <p className="text-xs text-gray-400">{macro.name}</p>
-              <p className="font-semibold">{macro.value}g</p>
+              <p className="text-xs text-muted-foreground">{macro.name}</p>
+              <p className={cn(
+                "font-semibold",
+                theme === 'light' ? "text-gray-800" : "text-white"
+              )}>{macro.value}g</p>
             </div>
           ))}
         </div>

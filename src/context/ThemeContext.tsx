@@ -21,6 +21,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (storedTheme) {
       setThemeState(storedTheme);
       document.documentElement.className = storedTheme;
+    } else {
+      // Define tema padrão como dark se não houver tema salvo
+      setThemeState('dark');
+      document.documentElement.className = 'dark';
     }
   }, []);
 
@@ -30,6 +34,15 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem('nutritrack_theme', newTheme);
     document.documentElement.className = newTheme;
     
+    // Remove classes de outros temas para evitar conflitos
+    if (newTheme === 'light') {
+      document.documentElement.classList.remove('dark', 'vibrant');
+    } else if (newTheme === 'dark') {
+      document.documentElement.classList.remove('light', 'vibrant');
+    } else if (newTheme === 'vibrant') {
+      document.documentElement.classList.remove('light', 'dark');
+    }
+    
     toast({
       title: "Tema alterado",
       description: `O tema foi alterado para ${
@@ -37,6 +50,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         newTheme === 'dark' ? 'Escuro' : 
         'Vibrante'
       }.`,
+      className: newTheme === 'light' ? 'bg-white text-black' : 
+                newTheme === 'dark' ? 'bg-nutritrack-card text-white' : 
+                'bg-nutritrack-vibrant-card text-white',
     });
   };
 
