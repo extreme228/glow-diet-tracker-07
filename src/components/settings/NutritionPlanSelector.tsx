@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNutrition } from '@/context/NutritionContext';
 import { useTheme } from '@/context/ThemeContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,6 +9,11 @@ import { Calendar, InfoIcon, ListChecks } from 'lucide-react';
 const NutritionPlanSelector = () => {
   const { nutritionPlans, activePlanId, setActivePlan } = useNutrition();
   const { theme } = useTheme();
+  
+  useEffect(() => {
+    // Debug log to check if plans are being loaded
+    console.log('Nutrition Plans:', nutritionPlans);
+  }, [nutritionPlans]);
   
   // Função para traduzir a categoria do plano para português
   const getPlanCategoryLabel = (category?: string) => {
@@ -31,7 +36,7 @@ const NutritionPlanSelector = () => {
   const activePlan = nutritionPlans.find(p => p.id === activePlanId);
 
   // Verifique se há algum plano disponível
-  const hasPlans = nutritionPlans.length > 0;
+  const hasPlans = nutritionPlans && nutritionPlans.length > 0;
   
   return (
     <div className="space-y-4">
