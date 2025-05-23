@@ -4,10 +4,31 @@ import { useNutrition } from '@/context/NutritionContext';
 import { useTheme } from '@/context/ThemeContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { Calendar, InfoIcon, ListChecks } from 'lucide-react';
 
 const NutritionPlanSelector = () => {
   const { nutritionPlans, activePlanId, setActivePlan } = useNutrition();
   const { theme } = useTheme();
+  
+  // Função para traduzir a categoria do plano para português
+  const getPlanCategoryLabel = (category?: string) => {
+    switch(category) {
+      case 'bulking': return 'Bulking';
+      case 'cutting': return 'Cutting';
+      case 'carb-cycling': return 'Ciclo de Carboidratos';
+      case 'maintenance': return 'Manutenção';
+      case 'peak-week': return 'Semana de Pico';
+      default: return 'Personalizado';
+    }
+  };
+  
+  // Função para traduzir o tipo do plano
+  const getPlanTypeLabel = (type?: string) => {
+    return type === 'weekly' ? 'Semanal' : 'Diário';
+  };
+
+  // Encontre o plano ativo
+  const activePlan = nutritionPlans.find(p => p.id === activePlanId);
   
   return (
     <div className="space-y-4">
@@ -19,32 +40,63 @@ const NutritionPlanSelector = () => {
         value={activePlanId || "default"}
         onValueChange={(value) => setActivePlan(value === "default" ? null : value)}
       >
-        <SelectTrigger className="w-full">
+        <SelectTrigger className={cn(
+          "w-full transition-all",
+          theme === 'vibrant' && "hover:border-primary focus:border-primary focus:ring-primary/20"
+        )}>
           <SelectValue placeholder="Selecione um plano nutricional" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="default">Padrão (Configurações Gerais)</SelectItem>
           {nutritionPlans.map(plan => (
             <SelectItem key={plan.id} value={plan.id}>
-              {plan.name} - {plan.category === 'carb-cycling' ? 'Ciclo de Carboidratos' : 
-                           plan.category === 'bulking' ? 'Bulking' :
-                           plan.category === 'cutting' ? 'Cutting' :
-                           plan.category === 'maintenance' ? 'Manutenção' : 'Personalizado'}
+              {plan.name} - {getPlanCategoryLabel(plan.category)}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
       
-      {activePlanId && (
-        <div className="mt-2 p-3 rounded-lg bg-muted/50 text-sm">
-          <p className="font-medium text-card-foreground">
-            Plano ativo: {nutritionPlans.find(p => p.id === activePlanId)?.name}
-          </p>
-          <p className="text-muted-foreground">
-            {nutritionPlans.find(p => p.id === activePlanId)?.type === 'weekly' 
-              ? 'Este plano usa valores diferentes para cada dia da semana.'
-              : 'Este plano usa os mesmos valores para todos os dias.'}
-          </p>
+      {activePlanId && activePlan && (
+        <div className={cn(
+          "mt-4 p-4 rounded-lg space-y-3",
+          theme === 'light' 
+            ? "bg-blue-50 border border-blue-100" 
+            : "bg-blue-950/30 border border-blue-900/50"
+        )}>
+          <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+            <ListChecks className="w-4 h-4" />
+            <h4 className="font-semibold">Plano Ativo: {activePlan.name}</h4>
+          </div>
+          
+          <div className="grid gap-2">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">Tipo:</span>
+              <span className="font-medium flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5" />
+                {getPlanTypeLabel(activePlan.type)}
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">Categoria:</span>
+              <span className="font-medium">{getPlanCategoryLabel(activePlan.category)}</span>
+            </div>
+            
+            {activePlan.type === 'weekly' && (
+              <div className={cn(
+                "p-3 rounded-md text-sm mt-1",
+                theme === 'light' ? "bg-amber-50" : "bg-amber-950/30"
+              )}>
+                <div className="flex items-start gap-2">
+                  <InfoIcon className="w-4 h-4 text-amber-500 mt-0.5" />
+                  <p className="text-xs">
+                    Este plano tem valores diferentes para cada dia da semana.
+                    O dia da semana será identificado automaticamente para aplicar as metas corretas.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -10,7 +10,7 @@ interface WeeklyProgressProps {
 }
 
 export const WeeklyProgress: React.FC<WeeklyProgressProps> = ({ currentDate }) => {
-  const { getDailyNutrition, dailyGoal } = useNutrition();
+  const { getDailyNutrition, dailyGoal, getActivePlanGoals } = useNutrition();
   const { theme } = useTheme();
 
   // Get the last 7 days including current date
@@ -31,7 +31,12 @@ export const WeeklyProgress: React.FC<WeeklyProgressProps> = ({ currentDate }) =
   
   const weekData = weekDates.map(date => {
     const nutrition = getDailyNutrition(date);
-    const caloriePercentage = Math.round((nutrition.calories / dailyGoal.calories) * 100);
+    
+    // Obter metas do plano ativo para cada data ou usar metas padrão
+    const activePlanGoals = getActivePlanGoals(date);
+    const targetGoals = activePlanGoals || dailyGoal;
+    
+    const caloriePercentage = Math.round((nutrition.calories / targetGoals.calories) * 100);
     const dayName = new Date(date).toLocaleDateString('pt-BR', { weekday: 'short' });
     
     return {

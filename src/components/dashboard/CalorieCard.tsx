@@ -10,12 +10,16 @@ interface CalorieCardProps {
 }
 
 export const CalorieCard: React.FC<CalorieCardProps> = ({ date }) => {
-  const { getDailyNutrition, dailyGoal } = useNutrition();
+  const { getDailyNutrition, dailyGoal, getActivePlanGoals } = useNutrition();
   const { theme } = useTheme();
   const dailyNutrition = getDailyNutrition(date);
   
-  const caloriePercentage = Math.min(Math.round((dailyNutrition.calories / dailyGoal.calories) * 100), 100);
-  const caloriesRemaining = dailyGoal.calories - dailyNutrition.calories;
+  // Usar metas do plano ativo para a data específica ou as metas padrão
+  const activePlanGoals = getActivePlanGoals(date);
+  const targetGoals = activePlanGoals || dailyGoal;
+  
+  const caloriePercentage = Math.min(Math.round((dailyNutrition.calories / targetGoals.calories) * 100), 100);
+  const caloriesRemaining = targetGoals.calories - dailyNutrition.calories;
   
   const getProgressStyles = () => {
     if (theme === 'vibrant') {
@@ -59,7 +63,7 @@ export const CalorieCard: React.FC<CalorieCardProps> = ({ date }) => {
             <span className="text-2xl font-bold text-card-foreground">
               {dailyNutrition.calories}
             </span>
-            <span className="text-sm text-muted-foreground">/ {dailyGoal.calories}</span>
+            <span className="text-sm text-muted-foreground">/ {targetGoals.calories}</span>
           </div>
           <div className="flex items-center gap-1 text-sm">
             <TrendingUp className="w-3 h-3" />

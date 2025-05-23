@@ -11,9 +11,13 @@ interface MacroChartProps {
 }
 
 export const MacroChart: React.FC<MacroChartProps> = ({ date }) => {
-  const { getDailyNutrition } = useNutrition();
+  const { getDailyNutrition, getActivePlanGoals, dailyGoal } = useNutrition();
   const { theme } = useTheme();
   const dailyNutrition = getDailyNutrition(date);
+  
+  // Obter metas do plano ativo para a data específica ou usar as metas padrão
+  const activePlanGoals = getActivePlanGoals(date);
+  const targetGoals = activePlanGoals || dailyGoal;
 
   const getThemeColors = () => {
     if (theme === 'vibrant') {
@@ -46,6 +50,7 @@ export const MacroChart: React.FC<MacroChartProps> = ({ date }) => {
       color: colors.protein,
       unit: 'g',
       icon: Activity,
+      target: targetGoals.protein
     },
     {
       name: 'Carboidratos',
@@ -53,6 +58,7 @@ export const MacroChart: React.FC<MacroChartProps> = ({ date }) => {
       color: colors.carbs,
       unit: 'g',
       icon: Zap,
+      target: targetGoals.carbs
     },
     {
       name: 'Gorduras',
@@ -60,6 +66,7 @@ export const MacroChart: React.FC<MacroChartProps> = ({ date }) => {
       color: colors.fat,
       unit: 'g',
       icon: Droplets,
+      target: targetGoals.fat
     },
   ];
 
@@ -76,6 +83,7 @@ export const MacroChart: React.FC<MacroChartProps> = ({ date }) => {
             : "bg-card/90 text-card-foreground border-border"
         )}>
           <p className="font-semibold">{`${data.name}: ${data.value}${data.unit}`}</p>
+          <p className="text-xs text-muted-foreground">{`Meta: ${data.target}${data.unit}`}</p>
         </div>
       );
     }
@@ -147,7 +155,10 @@ export const MacroChart: React.FC<MacroChartProps> = ({ date }) => {
                 <macro.icon className="w-4 h-4" style={{ color: macro.color }} />
               </div>
               <p className="text-xs text-muted-foreground mb-1">{macro.name}</p>
-              <p className="font-semibold text-card-foreground">{macro.value}g</p>
+              <div className="font-semibold text-card-foreground">{macro.value}g</div>
+              <div className="text-xs text-muted-foreground mt-1">
+                Meta: {macro.target}g
+              </div>
             </div>
           ))}
         </div>
