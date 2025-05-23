@@ -1,3 +1,4 @@
+
 export interface Food {
   id: string;
   name: string;
@@ -38,6 +39,8 @@ export type NutritionSummary = {
   fat: number;
 };
 
+export type NutritionPlanCategory = 'bulking' | 'cutting' | 'maintenance' | 'carb-cycling' | 'peak-week' | 'custom';
+
 export type NutritionPlan = {
   id: string;
   name: string;
@@ -45,5 +48,5 @@ export type NutritionPlan = {
   goals?: DailyGoal; // para planos do tipo 'daily'
   weeklyGoals?: { [key: number]: DailyGoal }; // para planos do tipo 'weekly', onde a chave é o dia da semana (0-6)
   description?: string;
-  category?: 'bulking' | 'cutting' | 'maintenance' | 'carb-cycling' | 'custom';
+  category?: NutritionPlanCategory;
 };

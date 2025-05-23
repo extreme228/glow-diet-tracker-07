@@ -7,7 +7,7 @@ import { QuickStats } from '@/components/dashboard/QuickStats';
 import { WeeklyProgress } from '@/components/dashboard/WeeklyProgress';
 import { formatDate, getToday } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Calendar, TrendingUp, Target, Zap, Apple, ListChecks } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, TrendingUp, Target, Zap, Apple, ListChecks, Utensils } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
 import { cn } from '@/lib/utils';
 import { useNutrition } from '@/context/NutritionContext';
@@ -127,7 +127,7 @@ const Index = () => {
           )}
           onClick={() => window.location.href = '/add-meal'}
         >
-          <Apple className="w-4 h-4" />
+          <Utensils className="w-4 h-4" />
           Adicionar Refeição
         </Button>
         <Button
@@ -139,7 +139,7 @@ const Index = () => {
           )}
           onClick={() => window.location.href = '/foods'}
         >
-          <Zap className="w-4 h-4" />
+          <Apple className="w-4 h-4" />
           Gerenciar Alimentos
         </Button>
         {activePlan && (

@@ -1,16 +1,19 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNutrition } from '@/context/NutritionContext';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/context/ThemeContext';
-import { Activity, Flame, Target, TrendingUp, Clock, Award, ListChecks } from 'lucide-react';
+import { Activity, Flame, Target, TrendingUp, Clock, Award, ListChecks, Settings } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 interface QuickStatsProps {
   date: string;
 }
 
 export const QuickStats: React.FC<QuickStatsProps> = ({ date }) => {
-  const { getDailyNutrition, dailyGoal, getMealsForDate, getActivePlanGoals, activePlanId, nutritionPlans } = useNutrition();
+  const { getDailyNutrition, dailyGoal, getMealsForDate, getActivePlanGoals, activePlanId, nutritionPlans, setActivePlan } = useNutrition();
   const { theme } = useTheme();
   const dailyNutrition = getDailyNutrition(date);
   const meals = getMealsForDate(date);
@@ -38,7 +41,8 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ date }) => {
       percentage: caloriePercentage,
       color: 'text-orange-500',
       bgColor: theme === 'light' ? 'bg-orange-100' : 'bg-orange-500/20',
-      unit: 'kcal'
+      unit: 'kcal',
+      config: true // Indica que este stat deve ter o botão de configuração
     },
     {
       icon: Activity,
@@ -120,9 +124,59 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ date }) => {
                 <div className={cn("p-2 rounded-lg", stat.bgColor)}>
                   <stat.icon className={cn("w-4 h-4", stat.color)} />
                 </div>
-                {stat.percentage >= 100 && stat.label !== 'Meta Atingida' && (
-                  <Award className="w-4 h-4 text-amber-500" />
-                )}
+                <div className="flex items-center gap-2">
+                  {stat.percentage >= 100 && stat.label !== 'Meta Atingida' && (
+                    <Award className="w-4 h-4 text-amber-500" />
+                  )}
+                  {stat.config && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className={cn(
+                          "p-1 rounded-md hover:bg-muted",
+                          theme === 'vibrant' && "hover:bg-purple-500/20"
+                        )}>
+                          <Settings className="w-3.5 h-3.5 text-muted-foreground" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent 
+                        className="w-72" 
+                        align="end"
+                        sideOffset={5}
+                      >
+                        <div className="space-y-4">
+                          <h4 className="font-medium text-sm">Fonte dos dados nutricionais</h4>
+                          <p className="text-xs text-muted-foreground">
+                            Escolha de onde puxar suas metas nutricionais
+                          </p>
+                          <RadioGroup 
+                            defaultValue={activePlanId || "default"} 
+                            onValueChange={(value) => setActivePlan(value === "default" ? null : value)}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="default" id="default" />
+                              <Label htmlFor="default">Padrão (Configurações)</Label>
+                            </div>
+                            
+                            {nutritionPlans.map(plan => (
+                              <div key={plan.id} className="flex items-center space-x-2">
+                                <RadioGroupItem value={plan.id} id={plan.id} />
+                                <Label htmlFor={plan.id}>
+                                  {plan.name}
+                                  <span className="ml-1 text-xs text-muted-foreground">
+                                    ({plan.category === 'bulking' ? 'Bulking' : 
+                                     plan.category === 'cutting' ? 'Cutting' : 
+                                     plan.category === 'carb-cycling' ? 'Ciclo de Carboidratos' : 
+                                     plan.category === 'maintenance' ? 'Manutenção' : 'Personalizado'})
+                                  </span>
+                                </Label>
+                              </div>
+                            ))}
+                          </RadioGroup>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </div>
               </div>
               
               <div className="space-y-1">
